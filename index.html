@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rilievo Pozzetti (PWA demo)</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1f4fd8" />
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Rilievo Pozzetti</h1>
+    <div class="badge" id="netStatus">…</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Dati generali</h2>
+
+      <div class="grid2">
+        <label>
+          ID Scheda
+          <input id="idScheda" placeholder="es. PZ-001" />
+        </label>
+
+        <label>
+          Data
+          <input id="dataScheda" type="date" />
+        </label>
+
+        <label>
+          Comune
+          <input id="comune" />
+        </label>
+
+        <label>
+          Via
+          <input id="via" />
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Coordinate (modificabili dopo)</h2>
+      <div class="grid3">
+        <label>
+          X
+          <input id="coordX" inputmode="decimal" placeholder="(vuoto se non disponibile)" />
+        </label>
+        <label>
+          Y
+          <input id="coordY" inputmode="decimal" placeholder="(vuoto se non disponibile)" />
+        </label>
+        <label>
+          Sistema
+          <select id="coordSistema">
+            <option>Gauss-Boaga</option>
+            <option>UTM WGS84</option>
+            <option>ETRF2000</option>
+            <option value="ALTRO">Altro…</option>
+          </select>
+          <input id="coordSistemaAltro" class="altro" placeholder="Specificare sistema" />
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Manufatto</h2>
+
+      <div class="grid3">
+        <label>
+          Tipo
+          <select id="tipoManufatto">
+            <option>Pozzetto</option>
+            <option>Chiusino</option>
+            <option>Torrino</option>
+            <option>Caditoia</option>
+            <option value="ALTRO">Altro…</option>
+          </select>
+          <input id="tipoManufattoAltro" class="altro" placeholder="Specificare tipo" />
+        </label>
+
+        <label>
+          Materiale
+          <select id="materiale">
+            <option>CLS</option>
+            <option>PVC</option>
+            <option>Ghisa</option>
+            <option>Laterizio</option>
+            <option value="ALTRO">Altro…</option>
+          </select>
+          <input id="materialeAltro" class="altro" placeholder="Specificare materiale" />
+        </label>
+
+        <label>
+          Quota chiusino (m)
+          <input id="quotaChiusino" inputmode="decimal" placeholder="es. 151,2" />
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Condotte presenti</h2>
+
+      <div class="row">
+        <button id="btnAddCondotta" type="button">+ Aggiungi condotta</button>
+        <button id="btnClearCondotte" type="button" class="secondary">Svuota</button>
+      </div>
+
+      <div class="tableWrap">
+        <table id="tblCondotte">
+          <thead>
+            <tr>
+              <th>ID schema</th>
+              <th>Direzione</th>
+              <th>Quota scorrimento (m)</th>
+              <th>Diametro (mm)</th>
+              <th>Materiale</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <p class="hint">
+        Quote: accetta “-0.6” oppure “-0,6”. Verranno salvate come numero.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Foto</h2>
+      <div class="row">
+        <input id="fotoInput" type="file" accept="image/*" capture="environment" multiple />
+        <button id="btnClearFotos" type="button" class="secondary">Rimuovi tutte</button>
+      </div>
+      <div id="fotoGrid" class="fotoGrid"></div>
+    </section>
+
+    <section class="card">
+      <h2>Azioni</h2>
+      <div class="row wrap">
+        <button id="btnSave" type="button">💾 Salva</button>
+        <button id="btnLoad" type="button" class="secondary">📂 Carica</button>
+        <button id="btnExport" type="button" class="secondary">⬇️ Esporta JSON</button>
+        <button id="btnNew" type="button" class="danger">🧹 Nuova scheda</button>
+      </div>
+      <div id="msg" class="msg"></div>
+    </section>
+  </main>
+
+  <footer>
+    <small>Demo PWA offline + salvataggio locale (IndexedDB)</small>
+  </footer>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
