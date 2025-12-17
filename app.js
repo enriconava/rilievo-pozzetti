@@ -5,12 +5,6 @@ if ("serviceWorker" in navigator) {
 
 const $ = (id) => document.getElementById(id);
 
-const ALTRO_VALUE = "altro";
-function capFirst(s) {
-  s = (s || "").toString();
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-}
-
 function showMsg(text, ok = true) {
   const msg = $("msg");
   msg.textContent = text;
@@ -31,7 +25,7 @@ function bindAltro(selectId, altroInputId) {
   const sel = $(selectId);
   const altro = $(altroInputId);
   const refresh = () => {
-    const isAltro = (sel.value || "").toLowerCase() === ALTRO_VALUE;
+    const isAltro = sel.value === "ALTRO";
     altro.style.display = isAltro ? "block" : "none";
     if (!isAltro) altro.value = "";
   };
@@ -103,24 +97,17 @@ $("btnClearIntro").addEventListener("click", () => {
   showMsg("Dati generali cancellati.");
 });
 
-/* ===== Tipo punto: macro + sub ===== */
+/* ===== Tipo punto: macro + sub (ordinati alfabeticamente; “Altro” in fondo) ===== */
 const TIPO_PUNTO = {
-  "altro": [
-    "Pozzetto con sfioro",
-    "Pozzetto duale",
-    "Terminale Acque Bianche/sfiorate"
-  ],
-  "caditoia di linea": [
-    "Caditoia a bocca di lupo su linea",
-    "Caditoia ispezione su linea"
-  ],
-  "caditoia fuori linea": [
+  "ALTRO": ["Pozzetto con sfioro", "Pozzetto duale", "Terminale Acque Bianche/sfiorate"],
+  "CADITOIA DI LINEA": ["Caditoia a bocca di lupo su linea", "Caditoia ispezione su linea"],
+  "CADITOIA FUORI LINEA": [
     "Caditoia a bocca di lupo",
     "Caditoia mista (a bocca di lupo con griglia)",
     "Caditoia piana",
     "Griglia (canalina di scolo)"
   ],
-  "cameretta": [
+  "CAMERETTA": [
     "Accesso a rete in pressione",
     "Confluenza",
     "Confluenza e Salto",
@@ -133,14 +120,10 @@ const TIPO_PUNTO = {
     "Sifone di valle",
     "Testa"
   ],
-  "disoleatore": [],
-  "fossa settica/biologica": [
-    "Imhoff",
-    "Tradizionale"
-  ],
-  "griglia": [],
-  "impianto di depurazione": [],
-  "impianto di grigliatura": [
+  "DISOLEATORE": [],
+  "FOSSA SETTICA/BIOLOGICA": ["Imhoff", "Tradizionale"],
+  "IMPIANTO DI DEPURAZIONE": [],
+  "IMPIANTO DI GRIGLIATURA": [
     "Griglia a barre",
     "Griglia a tamburo",
     "Griglia con elementi mobili della grata",
@@ -148,7 +131,7 @@ const TIPO_PUNTO = {
     "Schermatura ad arco",
     "sconosciuto"
   ],
-  "impianto di sollevamento": [
+  "IMPIANTO DI SOLLEVAMENTO": [
     "Di linea di acque miste",
     "Di linea di sole acque bianche",
     "Di linea di sole acque nere",
@@ -156,30 +139,18 @@ const TIPO_PUNTO = {
     "Immissione vasca",
     "Svuotamento Vasca"
   ],
-  "ispezione": [],
-  "misuratore": [
-    "Altro",
-    "Contatore",
-    "Generico",
-    "Livello",
-    "Portata a gravità",
-    "Portata in pressione"
-  ],
-  "nodo di emissione in cameretta": [],
-  "nodo di immissione": [],
-  "nodo reticolo idrico": [
-    "Ispezione Reticolo Idrico",
-    "Nodo Reticolo Idrico"
-  ],
-  "pluviale": [],
-  "pozzetto dissabbiatore": [],
-  "pozzetto fantasma": [],
-  "pozzetto separatore": [],
-  "pozzo perdente": [],
-  "punto campionamento acque depurate": [],
-  "punto di allacciamento utente industriale": [],
-  "punto di campionamento utente industriale": [],
-  "raccordo": [
+  "MISURATORE": ["Altro", "Contatore", "Generico", "Livello", "Portata a gravità", "Portata in pressione"],
+  "NODO DI EMISSIONE IN CAMERETTA": [],
+  "NODO DI IMMISSIONE": [],
+  "NODO RETICOLO IDRICO": ["Ispezione Reticolo Idrico", "Nodo Reticolo Idrico"],
+  "POZZETTO DISSABBIATORE": [],
+  "POZZETTO FANTASMA": [],
+  "POZZETTO SEPARATORE": [],
+  "POZZO PERDENTE": [],
+  "PUNTO CAMPIONAMENTO ACQUE DEPURATE": [],
+  "PUNTO DI ALLACCIAMENTO UTENTE INDUSTRIALE": [],
+  "PUNTO DI CAMPIONAMENTO UTENTE INDUSTRIALE": [],
+  "RACCORDO": [
     "Altro",
     "Connessione a T - INNESTO ALLACCIAMENTO",
     "Connessione a T - NODO DI EMISSIONE SENZA ISPEZIONE",
@@ -190,7 +161,7 @@ const TIPO_PUNTO = {
     "Pozzetto privato",
     "Pozzetto privato con Sifone"
   ],
-  "scarico": [
+  "SCARICO": [
     "Bypass Depuratore",
     "Da impianto Depurazione",
     "Da Scarico di Emergenza",
@@ -202,23 +173,26 @@ const TIPO_PUNTO = {
     "Terminale",
     "Terminale Acque Bianche"
   ],
-  "scarico in cameretta": [],
-  "sfioratore": [
+  "SCARICO IN CAMERETTA": [],
+  "SFIORATORE": [
     "By-pass depuratore",
     "Di linea con scarico in C.I.S.",
     "Di linea con scarico in suolo",
     "Immissione vasca a dispersione",
     "Immissione vasca a tenuta"
   ],
-  "valvola di ritegno": [],
-  "vasca di laminazione - accumulo": [
+  "VALVOLA DI RITEGNO": [],
+  "VASCA DI LAMINAZIONE - ACCUMULO": [
     "Accumulo",
     "Altro",
     "Vasca di dispersione",
     "Vasca di laminazione",
     "Vasca di prima pioggia",
     "Vasca volano"
-  ]
+  ],
+  "GRIGLIA": [],
+  "ISPEZIONE": [],
+  "PLUVIALE": []
 };
 
 function fillSelect(selectEl, options, placeholderText) {
@@ -238,8 +212,7 @@ function fillSelect(selectEl, options, placeholderText) {
 
 function buildTipoPuntoSub(macro, preferredValue = "") {
   const subSel = $("tipoPuntoSub");
-  const key = (macro || "").toLowerCase();
-  const subs = TIPO_PUNTO[key] ?? [];
+  const subs = TIPO_PUNTO[macro] ?? [];
 
   if (!macro) {
     subSel.disabled = true;
@@ -257,203 +230,111 @@ function buildTipoPuntoSub(macro, preferredValue = "") {
 }
 
 function updateTipoPuntoAltroVisibility() {
-  const macro = ($("tipoPuntoMacro").value || "").toLowerCase();
+  const macro = $("tipoPuntoMacro").value;
   const subSel = $("tipoPuntoSub");
   const subVal = subSel.disabled ? "" : (subSel.value || "");
-  const showAltro = macro === ALTRO_VALUE || subVal === "Altro";
+  const showAltro = (macro === "ALTRO") || (subVal === "Altro");
   $("tipoPuntoAltro").style.display = showAltro ? "block" : "none";
   if (!showAltro) $("tipoPuntoAltro").value = "";
 }
 
-/* ===== Tipologia rete -> mostra/nasconde Tipologia fognatura ===== */
-function setTipologiaFognaturaVisible(visible) {
-  $("wrapTipologiaFognatura").classList.toggle("hiddenBlock", !visible);
-  if (!visible) {
-    $("tipologiaFognatura").value = "";
-    $("tipologiaFognaturaAltro").value = "";
-    $("tipologiaFognatura").dispatchEvent(new Event("change"));
-  }
-}
-function refreshTipologiaFognaturaVisibility() {
-  const isFognatura = $("tipologiaRete").value === "Fognatura";
-  setTipologiaFognaturaVisible(isFognatura);
-}
-
-/* ===== Validazione numeri + unità: OBBLIGATORIA se data-unit presente ===== */
+/* ===== Validazione: vieta "," nei decimali, evidenzia rosso ===== */
 const INVALID_COLOR = "#b00020";
 
 function markInvalid(el) {
+  if (!el) return;
+  if (!el.dataset._oldBorderColor) el.dataset._oldBorderColor = el.style.borderColor || "";
+  if (!el.dataset._oldBoxShadow) el.dataset._oldBoxShadow = el.style.boxShadow || "";
   el.style.borderColor = INVALID_COLOR;
   el.style.boxShadow = "0 0 0 2px rgba(176,0,32,0.15)";
 }
 
 function clearInvalid(el) {
-  el.style.borderColor = "";
-  el.style.boxShadow = "";
+  if (!el) return;
+  if (el.dataset._oldBorderColor !== undefined) el.style.borderColor = el.dataset._oldBorderColor;
+  if (el.dataset._oldBoxShadow !== undefined) el.style.boxShadow = el.dataset._oldBoxShadow;
+  delete el.dataset._oldBorderColor;
+  delete el.dataset._oldBoxShadow;
+}
+
+function hasComma(val) {
+  return typeof val === "string" && val.includes(",");
+}
+
+/* ✅ LIVE CHECK: blocca la virgola sui campi numerici */
+function wireLiveDecimalValidation() {
+  const nodes = [
+    ...document.querySelectorAll("input[data-decimal='1']"),
+    ...$("tblCondotte").querySelectorAll("tbody input[data-decimal='1']")
+  ];
+
+  nodes.forEach((inp) => {
+    if (inp.dataset._wiredDecimal === "1") return;
+    inp.dataset._wiredDecimal = "1";
+
+    inp.addEventListener("input", () => {
+      const v = inp.value.trim();
+      if (hasComma(v)) {
+        markInvalid(inp);
+        showMsg("Usa il punto (.) per i decimali. La virgola (,) non è ammessa.", false);
+      } else {
+        clearInvalid(inp);
+      }
+    });
+  });
 }
 
 function clearAllValidation() {
-  document.querySelectorAll("input, select, textarea").forEach(clearInvalid);
+  const nodes = [
+    $("idScheda"),
+    ...document.querySelectorAll("input[data-decimal='1']"),
+    ...$("tblCondotte").querySelectorAll("tbody input[data-decimal='1']")
+  ];
+  nodes.forEach(clearInvalid);
 }
 
-function isValidNumberWithDot(val) {
-  // vuoto ammesso
-  if (val === "") return true;
-
-  // virgola NON ammessa
-  if (val.includes(",")) return false;
-
-  // numero valido (intero o decimale con .)
-  return /^-?\d+(\.\d+)?$/.test(val);
-}
-
-function validateAllNumericFields() {
+function validateBeforeSave() {
+  clearAllValidation();
   const bad = [];
 
-  document.querySelectorAll("input[data-num]").forEach((el) => {
-    const label = el.dataset.label || el.id;
-    const value = el.value.trim();
+  const idVal = $("idScheda").value.trim();
+  if (!/^\d+$/.test(idVal)) {
+    bad.push("ID Scheda (solo numero intero)");
+    markInvalid($("idScheda"));
+  }
+  if (hasComma(idVal)) {
+    bad.push("ID Scheda (virgola non ammessa)");
+    markInvalid($("idScheda"));
+  }
 
-    if (!isValidNumberWithDot(value)) {
+  // ✅ valida tutti i campi numerici marcati data-decimal=1
+  const allDecimals = [
+    ...document.querySelectorAll("input[data-decimal='1']"),
+    ...$("tblCondotte").querySelectorAll("tbody input[data-decimal='1']")
+  ];
+
+  allDecimals.forEach((inp) => {
+    const label = inp.dataset.label || inp.id || "Campo numerico";
+    if (hasComma(inp.value.trim())) {
       bad.push(label);
-      markInvalid(el);
+      markInvalid(inp);
     }
   });
 
   if (bad.length) {
-    showMsg(
-      `Errore: usa il punto (.) per i decimali. Non usare la virgola (,). Campi errati: ${bad.join(" • ")}`,
-      false
-    );
+    showMsg(`Usa il punto (.) al posto della virgola (,) nei campi: ${bad.join(" • ")}`, false);
     return false;
   }
   return true;
 }
 
-function validateBeforeSave() {
-  clearAllValidation();
-  return validateAllNumericFields();
-}
-
-
-function parseNumericOnly(raw, kind) {
-  const s = (raw ?? "").toString().trim();
-  if (!s) return { ok: true, empty: true, normalized: "" };
-  if (kind === "int") {
-    if (s.includes(".") || s.includes(",") || !isValidIntNumberPart(s)) return { ok: false };
-    return { ok: true, empty: false, normalized: s };
-  }
-  if (hasComma(s)) return { ok: false };
-  if (!isValidDecimalNumberPart(s)) return { ok: false };
-  return { ok: true, empty: false, normalized: s };
-}
-
-function validateAllNumericFields() {
-  const bad = [];
-
-  // statici
-  const inputs = [...document.querySelectorAll("input[data-num]")];
-
-  for (const el of inputs) {
-    const label = el.dataset.label || el.id || "Campo numerico";
-    const kind = el.dataset.num; // int | decimal
-    const required = el.dataset.required === "1";
-    const unit = (el.dataset.unit || "").trim();
-    const raw = (el.value ?? "").trim();
-
-    if (!raw) {
-      if (required) {
-        bad.push(`${label} (obbligatorio)`);
-        markInvalid(el);
-      }
-      continue;
-    }
-
-    if (unit) {
-      const r = parseUnitFieldStrict(raw, unit, kind);
-      if (!r.ok) {
-        bad.push(label);
-        markInvalid(el);
-      }
-    } else {
-      const r = parseNumericOnly(raw, kind);
-      if (!r.ok) {
-        bad.push(label);
-        markInvalid(el);
-      }
-    }
-  }
-
-  // dinamici condotte
-  const dyn = [...$("tblCondotte").querySelectorAll("tbody input[data-num]")];
-  for (const el of dyn) {
-    const label = el.dataset.label || "Condotta - campo numerico";
-    const kind = el.dataset.num;
-    const unit = (el.dataset.unit || "").trim();
-    const raw = (el.value ?? "").trim();
-    if (!raw) continue;
-
-    if (unit) {
-      const r = parseUnitFieldStrict(raw, unit, kind);
-      if (!r.ok) {
-        bad.push(label);
-        markInvalid(el);
-      }
-    } else {
-      const r = parseNumericOnly(raw, kind);
-      if (!r.ok) {
-        bad.push(label);
-        markInvalid(el);
-      }
-    }
-  }
-
-  if (bad.length) {
-    showMsg(
-      `Errore numeri/unità: inserisci l’unità (es. 1.20 m, 60 cm) e usa il punto (.) per i decimali. Campi errati: ${bad.join(" • ")}`,
-      false
-    );
-    return false;
-  }
-  return true;
-}
-
-function attachLiveNumericValidation(el) {
-  const kind = el.dataset.num;
-  const unit = (el.dataset.unit || "").trim();
-  if (!kind) return;
-
-  const check = () => {
-    clearInvalid(el);
-    const raw = (el.value ?? "").trim();
-    if (!raw) return;
-
-    let ok = true;
-    if (unit) ok = parseUnitFieldStrict(raw, unit, kind).ok;
-    else ok = parseNumericOnly(raw, kind).ok;
-
-    if (!ok) markInvalid(el);
-  };
-
-  el.addEventListener("input", check);
-  el.addEventListener("change", check);
-
-  // normalizza SOLO lo spazio (es. "60cm" -> "60 cm"), ma NON aggiunge unità se manca
-  if (unit) {
-    el.addEventListener("blur", () => {
-      clearInvalid(el);
-      const raw = (el.value ?? "").trim();
-      if (!raw) return;
-      const r = parseUnitFieldStrict(raw, unit, kind);
-      if (r.ok) el.value = r.normalized;
-      else markInvalid(el);
-    });
-  }
-}
-
-function validateBeforeSave() {
-  clearAllValidation();
-  return validateAllNumericFields();
+/* ===== Parsing: vuoto -> "" ; altrimenti numero (con punto) ===== */
+function parseNumeroOrEmpty(val) {
+  const v = (val ?? "").toString().trim();
+  if (!v) return "";
+  if (hasComma(v)) return "";
+  const n = Number(v);
+  return Number.isFinite(n) ? n : "";
 }
 
 /* ===== ID progressivo: solo numero ===== */
@@ -469,35 +350,124 @@ function saveLastId(id) {
   if (id) localStorage.setItem(LAST_ID_KEY, id);
 }
 
-/* ===== Helpers select per tabella ===== */
-const TIP_FOGNATURA = ["Acque Tecnologiche", "Bianca", "Depurata", "Mista", "Nera", "Sfiorata"];
-const DIREZIONI_CONDOTTA = ["Attraversamento", "Entrante", "Uscente"];
+/* ===== Helpers select per tabella (ORDINATI) ===== */
+const TIP_FOGNATURA = [
+  "Acque Tecnologiche",
+  "Bianca",
+  "Depurata",
+  "Mista",
+  "Nera",
+  "Sfiorata"
+];
+
+const DIREZIONE_CONDOTTA = ["Entrante", "Uscente", "Attraversamento"];
 
 const COLORI_TUBAZIONI = [
-  "Azzurro", "Bianco", "Blu", "Giallo", "Grigio", "Marrone", "Nero", "Arancione", "Rosso", "Verde", "Viola"
+  "Azzurro",
+  "Bianco",
+  "Blu",
+  "Giallo",
+  "Grigio",
+  "Marrone",
+  "Nero",
+  "Arancione",
+  "Rosso",
+  "Verde",
+  "Viola"
 ];
 
 const MATERIALI_LIST = [
-  "Acciaio","Acciaio inossidabile","Acciaio legato","Acciaio plastificato","Acciaio verniciato","Acciaio zincato",
-  "Calcestruzzo di poliestere","Cemento amianto","Cemento armato polimero","CLS","CLS fondo Gres","CLS Gettato",
-  "CLS Prefabbricato","CLS Prefabbricato fondo gres","Ferro","Fibrocemento","Ghisa","Ghisa grigia (con grafite lamellare)",
-  "Ghisa sferoidale","Gres ceramico","Lamiera","Lamiera Zincata","Legno","Metallo","Miscela di materiali diversi","Muratura",
-  "Ottone","PEAD","PEAD - 100","PEAD - 80","Pietra","Polietilene","Polietilene normalizzato esterno","Poliestere",
-  "Polipropilene","PVC","PVC  forte","Resina di poliestere","Resina termoindurente rinforzata con fibre vetro",
-  "Non applicabile","Non assegnato","Non conosciuto","Non definito"
+  "Acciaio",
+  "Acciaio inossidabile",
+  "Acciaio legato",
+  "Acciaio plastificato",
+  "Acciaio verniciato",
+  "Acciaio zincato",
+  "Calcestruzzo di poliestere",
+  "Cemento amianto",
+  "Cemento armato polimero",
+  "CLS",
+  "CLS fondo Gres",
+  "CLS Gettato",
+  "CLS Prefabbricato",
+  "CLS Prefabbricato fondo gres",
+  "Ferro",
+  "Fibrocemento",
+  "Ghisa",
+  "Ghisa grigia (con grafite lamellare)",
+  "Ghisa sferoidale",
+  "Gres ceramico",
+  "Lamiera",
+  "Lamiera Zincata",
+  "Legno",
+  "Metallo",
+  "Miscela di materiali diversi",
+  "Muratura",
+  "Ottone",
+  "PEAD",
+  "PEAD - 100",
+  "PEAD - 80",
+  "Pietra",
+  "Polietilene",
+  "Polietilene normalizzato esterno",
+  "Poliestere",
+  "Polipropilene",
+  "PVC",
+  "PVC  forte",
+  "Resina di poliestere",
+  "Resina termoindurente rinforzata con fibre vetro",
+  "Non applicabile",
+  "Non assegnato",
+  "Non conosciuto",
+  "Non definito"
 ];
 
 const SEZIONI_LIST = [
-  "A volta sez. ribassata","Circolare","Circolare parzializzata","Ellittica","Ovoidale (alt/larg= 3/2)","Ovoidale parzializzato",
-  "Ovoidale sezione tipo C","Ovoidale sezione tipo Lissone","Policentrica sezione tipo D","Policentrica sezione tipo E1",
-  "Policentrica sezione tipo E2","Policentrica sezione tipo F","Policentrica sezione tipo G","Policentrica sezione tipo H",
-  "Policentrica sezione tipo I","Policentrica sezione tipo L","Policentrico con cunetta","Policentrico senza cunetta","Quadrata",
-  "Rettangolare","Rettangolare - Scatolare con volta","Scatolare con cunetta","Scatolare con cunetta a cielo aperto",
-  "Scatolare senza cunetta","Scatolare senza cunetta a cielo aperto","Sezione tipo fungo","Semicircolare","Trapezoidale",
-  "Trapezoidale a cielo aperto","Non Applicabile","Non Assegnato","Non Definito","Non conosciuto"
+  "A volta sez. ribassata",
+  "Circolare",
+  "Circolare parzializzata",
+  "Ellittica",
+  "Ovoidale (alt/larg= 3/2)",
+  "Ovoidale parzializzato",
+  "Ovoidale sezione tipo C",
+  "Ovoidale sezione tipo Lissone",
+  "Policentrica sezione tipo D",
+  "Policentrica sezione tipo E1",
+  "Policentrica sezione tipo E2",
+  "Policentrica sezione tipo F",
+  "Policentrica sezione tipo G",
+  "Policentrica sezione tipo H",
+  "Policentrica sezione tipo I",
+  "Policentrica sezione tipo L",
+  "Policentrico con cunetta",
+  "Policentrico senza cunetta",
+  "Quadrata",
+  "Rettangolare",
+  "Rettangolare - Scatolare con volta",
+  "Scatolare con cunetta",
+  "Scatolare con cunetta a cielo aperto",
+  "Scatolare senza cunetta",
+  "Scatolare senza cunetta a cielo aperto",
+  "Sezione tipo fungo",
+  "Semicircolare",
+  "Trapezoidale",
+  "Trapezoidale a cielo aperto",
+  "Non Applicabile",
+  "Non Assegnato",
+  "Non Definito",
+  "Non conosciuto"
 ];
 
-const ID_SCHEMA_OPTS = ["n.1 - N","n.2 - NE","n.3 - E","n.4 - SE","n.5 - S","n.6 - SW","n.7 - W","n.8 - NW"];
+const ID_SCHEMA_OPTS = [
+  "n.1 - N",
+  "n.2 - NE",
+  "n.3 - E",
+  "n.4 - SE",
+  "n.5 - S",
+  "n.6 - SW",
+  "n.7 - W",
+  "n.8 - NW"
+];
 
 function makeSelect(options, placeholder = "— Seleziona —", includeAltro = false) {
   const sel = document.createElement("select");
@@ -532,7 +502,7 @@ function makeAltroInput(placeholder) {
 
 function wireAltro(selectEl, altroEl) {
   const refresh = () => {
-    const isAltro = (selectEl.value || "").toLowerCase() === ALTRO_VALUE;
+    const isAltro = selectEl.value === "ALTRO";
     altroEl.style.display = isAltro ? "block" : "none";
     if (!isAltro) altroEl.value = "";
   };
@@ -540,7 +510,7 @@ function wireAltro(selectEl, altroEl) {
   refresh();
 }
 
-/* ===== Stato app (shape) ===== */
+/* ===== Stato app ===== */
 function ensureStateShape(s) {
   const base = {
     id: "",
@@ -552,6 +522,7 @@ function ensureStateShape(s) {
 
     tipologia_rete: "",
     tipologia_rete_altro: "",
+
     tipologia_fognatura: "",
     tipologia_fognatura_altro: "",
     stato_servizio: "",
@@ -583,6 +554,7 @@ function ensureStateShape(s) {
 
       presenza_torrino: "",
       altezza_torrino_cm: "",
+
       materiale_torrino: "",
       materiale_torrino_altro: "",
       forma_torrino: "",
@@ -616,16 +588,32 @@ function ensureStateShape(s) {
   out.manufatto = { ...base.manufatto, ...(out.manufatto || {}) };
 
   out.condotte = Array.isArray(out.condotte) ? out.condotte : [];
-  // compatibilità: diametro_mm -> diametro_cm
   out.condotte = out.condotte.map((c) => ({
     id_schema: c?.id_schema ?? "",
     direzione: c?.direzione ?? "",
     tipologia: c?.tipologia ?? "",
     tipologia_altro: c?.tipologia_altro ?? "",
-    profondita_m: c?.profondita_m ?? c?.profondita_raw ?? "",
-    diametro_cm: c?.diametro_cm ?? c?.diametro_mm ?? "",
+
+    profondita_raw:
+      c?.profondita_raw ??
+      (c?.profondita_m !== "" && c?.profondita_m != null ? String(c.profondita_m) : ""),
+    profondita_m: c?.profondita_m ?? "",
+
+    diametro_raw:
+      c?.diametro_raw ??
+      (c?.diametro_cm !== "" && c?.diametro_cm != null ? String(c.diametro_cm) : ""),
+    diametro_cm: c?.diametro_cm ?? "",
+
+    larghezza_raw:
+      c?.larghezza_raw ??
+      (c?.larghezza_cm !== "" && c?.larghezza_cm != null ? String(c.larghezza_cm) : ""),
     larghezza_cm: c?.larghezza_cm ?? "",
+
+    altezza_raw:
+      c?.altezza_raw ??
+      (c?.altezza_cm !== "" && c?.altezza_cm != null ? String(c.altezza_cm) : ""),
     altezza_cm: c?.altezza_cm ?? "",
+
     materiale: c?.materiale ?? "",
     materiale_altro: c?.materiale_altro ?? "",
     sezione: c?.sezione ?? "",
@@ -650,7 +638,6 @@ setNetBadge();
 
 /* Bind “Altro…” (form) */
 bindAltro("tipologiaRete", "tipologiaReteAltro");
-bindAltro("tipologiaFognatura", "tipologiaFognaturaAltro");
 bindAltro("statoServizio", "statoServizioAltro");
 bindAltro("posizioneStrada", "posizioneStradaAltro");
 bindAltro("superficiePosa", "superficiePosaAltro");
@@ -665,8 +652,19 @@ bindAltro("formaTorrino", "formaTorrinoAltro");
 bindAltro("materialePozzetto", "materialePozzettoAltro");
 bindAltro("formaPozzetto", "formaPozzettoAltro");
 
-/* Tipologia rete -> show/hide Tipologia fognatura */
+bindAltro("tipologiaFognatura", "tipologiaFognaturaAltro");
+
+function refreshTipologiaFognaturaVisibility() {
+  const isFog = $("tipologiaRete").value === "Fognatura";
+  $("wrapTipologiaFognatura").style.display = isFog ? "block" : "none";
+  if (!isFog) {
+    $("tipologiaFognatura").value = "";
+    $("tipologiaFognaturaAltro").value = "";
+    $("tipologiaFognatura").dispatchEvent(new Event("change"));
+  }
+}
 $("tipologiaRete").addEventListener("change", refreshTipologiaFognaturaVisibility);
+refreshTipologiaFognaturaVisibility();
 
 /* ===== CONDOTTE: tabella ===== */
 function condottaRowTemplate(row, idx) {
@@ -680,8 +678,8 @@ function condottaRowTemplate(row, idx) {
   const idSchema = makeSelect(ID_SCHEMA_OPTS);
   idSchema.value = row.id_schema ?? "";
 
-  const direzione = makeSelect(DIREZIONI_CONDOTTA);
-  direzione.value = row.direzione ?? "";
+  const dirSel = makeSelect(DIREZIONE_CONDOTTA, "— Seleziona —", false);
+  dirSel.value = row.direzione ?? "";
 
   const tipWrap = document.createElement("div");
   tipWrap.className = "cellStack";
@@ -694,35 +692,31 @@ function condottaRowTemplate(row, idx) {
   tipWrap.appendChild(tipAlt);
 
   const prof = document.createElement("input");
-  prof.inputMode = "text";
-  prof.placeholder = "es. 1.20 m";
-  prof.value = row.profondita_m ?? "";
-  prof.dataset.num = "decimal";
-  prof.dataset.unit = "m";
+  prof.inputMode = "decimal";
+  prof.placeholder = "es. 1.20";
+  prof.value = row.profondita_raw ?? "";
+  prof.dataset.decimal = "1";
   prof.dataset.label = `Condotta ${idx + 1} - Profondità (m)`;
 
   const diam = document.createElement("input");
-  diam.inputMode = "text";
-  diam.placeholder = "es. 20 cm";
-  diam.value = row.diametro_cm ?? "";
-  diam.dataset.num = "int";
-  diam.dataset.unit = "cm";
+  diam.inputMode = "decimal";
+  diam.placeholder = "es. 20.5";
+  diam.value = row.diametro_raw ?? "";
+  diam.dataset.decimal = "1";
   diam.dataset.label = `Condotta ${idx + 1} - Diametro (cm)`;
 
   const larg = document.createElement("input");
-  larg.inputMode = "text";
-  larg.placeholder = "es. 80 cm";
-  larg.value = row.larghezza_cm ?? "";
-  larg.dataset.num = "int";
-  larg.dataset.unit = "cm";
+  larg.inputMode = "decimal";
+  larg.placeholder = "es. 30.0";
+  larg.value = row.larghezza_raw ?? "";
+  larg.dataset.decimal = "1";
   larg.dataset.label = `Condotta ${idx + 1} - Larghezza (cm)`;
 
   const alt = document.createElement("input");
-  alt.inputMode = "text";
-  alt.placeholder = "es. 120 cm";
-  alt.value = row.altezza_cm ?? "";
-  alt.dataset.num = "int";
-  alt.dataset.unit = "cm";
+  alt.inputMode = "decimal";
+  alt.placeholder = "es. 40.0";
+  alt.value = row.altezza_raw ?? "";
+  alt.dataset.decimal = "1";
   alt.dataset.label = `Condotta ${idx + 1} - Altezza (cm)`;
 
   const matWrap = document.createElement("div");
@@ -765,14 +759,15 @@ function condottaRowTemplate(row, idx) {
   });
 
   idSchema.addEventListener("change", () => (state.condotte[idx].id_schema = idSchema.value));
-  direzione.addEventListener("change", () => (state.condotte[idx].direzione = direzione.value));
+  dirSel.addEventListener("change", () => (state.condotte[idx].direzione = dirSel.value));
+
   tipSel.addEventListener("change", () => (state.condotte[idx].tipologia = tipSel.value));
   tipAlt.addEventListener("input", () => (state.condotte[idx].tipologia_altro = tipAlt.value));
 
-  prof.addEventListener("input", () => (state.condotte[idx].profondita_m = prof.value));
-  diam.addEventListener("input", () => (state.condotte[idx].diametro_cm = diam.value));
-  larg.addEventListener("input", () => (state.condotte[idx].larghezza_cm = larg.value));
-  alt.addEventListener("input", () => (state.condotte[idx].altezza_cm = alt.value));
+  prof.addEventListener("input", () => (state.condotte[idx].profondita_raw = prof.value));
+  diam.addEventListener("input", () => (state.condotte[idx].diametro_raw = diam.value));
+  larg.addEventListener("input", () => (state.condotte[idx].larghezza_raw = larg.value));
+  alt.addEventListener("input", () => (state.condotte[idx].altezza_raw = alt.value));
 
   matSel.addEventListener("change", () => (state.condotte[idx].materiale = matSel.value));
   matAlt.addEventListener("input", () => (state.condotte[idx].materiale_altro = matAlt.value));
@@ -783,10 +778,8 @@ function condottaRowTemplate(row, idx) {
   colSel.addEventListener("change", () => (state.condotte[idx].colore = colSel.value));
   colAlt.addEventListener("input", () => (state.condotte[idx].colore_altro = colAlt.value));
 
-  [prof, diam, larg, alt].forEach(attachLiveNumericValidation);
-
   tr.appendChild(td(idSchema));
-  tr.appendChild(td(direzione));
+  tr.appendChild(td(dirSel));
   tr.appendChild(td(tipWrap));
   tr.appendChild(td(prof));
   tr.appendChild(td(diam));
@@ -803,10 +796,13 @@ function condottaRowTemplate(row, idx) {
 function renderCondotte() {
   const tbody = $("tblCondotte").querySelector("tbody");
   tbody.innerHTML = "";
-  state.condotte.forEach((row, idx) => tbody.appendChild(condottaRowTemplate(row, idx)));
+  state.condotte.forEach((row, idx) => {
+    tbody.appendChild(condottaRowTemplate(row, idx));
+  });
+  wireLiveDecimalValidation();
 }
 
-/* ===== FOTO + CROP (invariato) ===== */
+/* ===== FOTO + CROP ===== */
 function renderFotos() {
   const grid = $("fotoGrid");
   grid.innerHTML = "";
@@ -853,6 +849,7 @@ let pendingCropFile = null;
 
 function openCropModal(dataUrl, file) {
   pendingCropFile = file;
+
   const modal = $("cropModal");
   const img = $("cropImage");
   img.src = dataUrl;
@@ -891,6 +888,7 @@ $("btnCropReset").addEventListener("click", () => cropper && cropper.reset());
 
 $("btnCropUse").addEventListener("click", () => {
   if (!cropper) return;
+
   const canvas = cropper.getCroppedCanvas({
     maxWidth: 1600,
     maxHeight: 1600,
@@ -933,10 +931,19 @@ $("btnAddCondotta").addEventListener("click", () => {
     direzione: "",
     tipologia: "",
     tipologia_altro: "",
+
+    profondita_raw: "",
     profondita_m: "",
+
+    diametro_raw: "",
     diametro_cm: "",
+
+    larghezza_raw: "",
     larghezza_cm: "",
+
+    altezza_raw: "",
     altezza_cm: "",
+
     materiale: "",
     materiale_altro: "",
     sezione: "",
@@ -971,9 +978,9 @@ function readFormIntoState() {
   state.tipologia_rete = $("tipologiaRete").value || "";
   state.tipologia_rete_altro = $("tipologiaReteAltro").value.trim();
 
-  const isFognatura = state.tipologia_rete === "Fognatura";
-  state.tipologia_fognatura = isFognatura ? ($("tipologiaFognatura").value || "") : "";
-  state.tipologia_fognatura_altro = isFognatura ? $("tipologiaFognaturaAltro").value.trim() : "";
+  const isFog = state.tipologia_rete === "Fognatura";
+  state.tipologia_fognatura = isFog ? ($("tipologiaFognatura").value || "") : "";
+  state.tipologia_fognatura_altro = isFog ? $("tipologiaFognaturaAltro").value.trim() : "";
 
   state.stato_servizio = $("statoServizio").value || "";
   state.stato_servizio_altro = $("statoServizioAltro").value.trim();
@@ -990,7 +997,6 @@ function readFormIntoState() {
   state.tipo_punto_sub = $("tipoPuntoSub").disabled ? "" : ($("tipoPuntoSub").value || "");
   state.tipo_punto_altro = $("tipoPuntoAltro").value.trim();
 
-  // Manufatto (unità salvate come stringa tipo "60 cm")
   state.manufatto.materiale = $("materiale").value || "";
   state.manufatto.materiale_altro = $("materialeAltro").value.trim();
 
@@ -1033,13 +1039,21 @@ function readFormIntoState() {
   state.manufatto.larghezza_pozzetto_cm = $("larghezzaPozzetto").value.trim();
   state.manufatto.diametro_pozzetto_cm = $("diametroPozzetto").value.trim();
 
-  state.manufatto.profondita_m = $("profondita").value.trim();
+  state.manufatto.profondita_m = parseNumeroOrEmpty($("profondita").value);
   state.manufatto.altro_pozzetto = $("altroPozzetto").value.trim();
 
   state.manufatto.ristagno_cm = $("ristagno").value.trim();
   state.manufatto.appoggio_accesso = $("appoggioAccesso").value || "";
   state.manufatto.presenza_sedimenti = $("presenzaSedimenti").value || "";
   state.manufatto.note_condizioni = $("noteCondizioni").value.trim();
+
+  state.condotte = state.condotte.map((c) => ({
+    ...c,
+    profondita_m: parseNumeroOrEmpty(c.profondita_raw ?? ""),
+    diametro_cm: parseNumeroOrEmpty(c.diametro_raw ?? ""),
+    larghezza_cm: parseNumeroOrEmpty(c.larghezza_raw ?? ""),
+    altezza_cm: parseNumeroOrEmpty(c.altezza_raw ?? "")
+  }));
 }
 
 function writeStateToForm() {
@@ -1048,8 +1062,8 @@ function writeStateToForm() {
   $("tipologiaRete").value = state.tipologia_rete || "";
   $("tipologiaReteAltro").value = state.tipologia_rete_altro || "";
   $("tipologiaRete").dispatchEvent(new Event("change"));
-  refreshTipologiaFognaturaVisibility();
 
+  refreshTipologiaFognaturaVisibility();
   if (state.tipologia_rete === "Fognatura") {
     $("tipologiaFognatura").value = state.tipologia_fognatura || "";
     $("tipologiaFognaturaAltro").value = state.tipologia_fognatura_altro || "";
@@ -1124,7 +1138,11 @@ function writeStateToForm() {
   $("larghezzaPozzetto").value = state.manufatto.larghezza_pozzetto_cm || "";
   $("diametroPozzetto").value = state.manufatto.diametro_pozzetto_cm || "";
 
-  $("profondita").value = state.manufatto.profondita_m || "";
+  $("profondita").value =
+    state.manufatto.profondita_m === "" || state.manufatto.profondita_m == null
+      ? ""
+      : String(state.manufatto.profondita_m);
+
   $("altroPozzetto").value = state.manufatto.altro_pozzetto || "";
 
   $("ristagno").value = state.manufatto.ristagno_cm || "";
@@ -1134,6 +1152,7 @@ function writeStateToForm() {
 
   renderCondotte();
   renderFotos();
+  wireLiveDecimalValidation();
 }
 
 /* ===== Salva+Esporta / Importa / Carica / Nuova ===== */
@@ -1142,8 +1161,6 @@ $("btnSaveExport").addEventListener("click", async () => {
 
   saveIntro(getIntroFromForm());
   readFormIntoState();
-
-  state = ensureStateShape(state);
 
   await dbPutScheda(state);
   exportStateAsJsonDownload();
@@ -1228,18 +1245,17 @@ $("btnNew").addEventListener("click", () => {
 
 /* ===== INIT ===== */
 (function init() {
-  // Macro tipo punto
   const macros = Object.keys(TIPO_PUNTO);
   const macrosSorted = macros
-    .filter((m) => m !== ALTRO_VALUE)
+    .filter((m) => m !== "ALTRO")
     .sort((a, b) => a.localeCompare(b, "it"))
-    .concat(macros.includes(ALTRO_VALUE) ? [ALTRO_VALUE] : []);
+    .concat(macros.includes("ALTRO") ? ["ALTRO"] : []);
 
   const macroSel = $("tipoPuntoMacro");
   macrosSorted.forEach((m) => {
     const o = document.createElement("option");
     o.value = m;
-    o.textContent = capFirst(m);
+    o.textContent = m;
     macroSel.appendChild(o);
   });
 
@@ -1249,24 +1265,23 @@ $("btnNew").addEventListener("click", () => {
   });
   $("tipoPuntoSub").addEventListener("change", updateTipoPuntoAltroVisibility);
 
-  // Intro persistente
   const intro = loadIntro();
   if (!intro.data_rilievo) intro.data_rilievo = todayISO();
   writeIntroToForm(intro);
 
-  // ID progressivo
   const last = loadLastId();
   const startId = /^\d+$/.test(last) ? incrementId(last) : "1";
   $("idScheda").value = startId;
   state.id = startId;
 
   refreshTipologiaFognaturaVisibility();
+
   buildTipoPuntoSub("", "");
-
-  // live validation su campi numerici statici
-  document.querySelectorAll("input[data-num]").forEach(attachLiveNumericValidation);
-
   writeStateToForm();
   renderCondotte();
   renderFotos();
+
+  wireLiveDecimalValidation();
 })();
+
+
