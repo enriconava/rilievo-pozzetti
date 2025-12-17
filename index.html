@@ -67,11 +67,11 @@
       <div class="grid2">
         <label>
           ID Scheda
-          <!-- inputmode decimal (richiesto), ma resta validato come intero in app.js -->
+          <!-- decimal inputmode ok, ma resta validato come intero -->
           <input id="idScheda" inputmode="decimal" placeholder="es. 1" />
         </label>
 
-        <!-- ✅ NUOVO: Tipologia rete (prima di Tipologia fognatura) -->
+        <!-- Tipologia rete -->
         <label>
           Tipologia rete
           <select id="tipologiaRete">
@@ -88,7 +88,7 @@
           <input id="tipologiaReteAltro" class="altro" placeholder="Specificare tipologia rete" />
         </label>
 
-        <!-- ✅ Tipologia fognatura visibile solo se Tipologia rete = Fognatura -->
+        <!-- Tipologia fognatura (solo se rete=Fognatura) -->
         <div id="wrapTipologiaFognatura" style="display:none;">
           <label>
             Tipologia fognatura
@@ -309,20 +309,19 @@
           <input id="formaChiusinoAltro" class="altro" placeholder="Specificare forma" />
         </label>
 
-        <!-- ✅ tutti ex-integer => decimal + data-decimal -->
         <label>
           Lunghezza chiusino (cm)
-          <input id="lunghezzaChiusino" inputmode="decimal" placeholder="es. 60" data-decimal="1" data-label="Lunghezza chiusino (cm)" />
+          <input id="lunghezzaChiusino" inputmode="decimal" placeholder="es. 60.5" data-decimal="1" data-label="Lunghezza chiusino (cm)" />
         </label>
 
         <label>
           Larghezza chiusino (cm)
-          <input id="larghezzaChiusino" inputmode="decimal" placeholder="es. 60" data-decimal="1" data-label="Larghezza chiusino (cm)" />
+          <input id="larghezzaChiusino" inputmode="decimal" placeholder="es. 60.5" data-decimal="1" data-label="Larghezza chiusino (cm)" />
         </label>
 
         <label>
           Diametro chiusino (cm)
-          <input id="diametroChiusino" inputmode="decimal" placeholder="es. 60" data-decimal="1" data-label="Diametro chiusino (cm)" />
+          <input id="diametroChiusino" inputmode="decimal" placeholder="es. 60.5" data-decimal="1" data-label="Diametro chiusino (cm)" />
         </label>
 
         <label>
@@ -344,7 +343,7 @@
 
         <label>
           Profondità banchina (cm)
-          <input id="profonditaBanchina" inputmode="decimal" placeholder="es. 30" data-decimal="1" data-label="Profondità banchina (cm)" />
+          <input id="profonditaBanchina" inputmode="decimal" placeholder="es. 30.5" data-decimal="1" data-label="Profondità banchina (cm)" />
         </label>
 
         <label>
@@ -355,7 +354,6 @@
 
       <h3 class="subhead">Torrino</h3>
       <div class="grid3">
-        <!-- ✅ NUOVO: presenza + altezza (inizio torrino) -->
         <label>
           Presenza torrino
           <select id="presenzaTorrino">
@@ -367,7 +365,7 @@
 
         <label>
           Altezza torrino (cm)
-          <input id="altezzaTorrino" inputmode="decimal" placeholder="es. 60" data-decimal="1" data-label="Altezza torrino (cm)" />
+          <input id="altezzaTorrino" inputmode="decimal" placeholder="es. 60.5" data-decimal="1" data-label="Altezza torrino (cm)" />
         </label>
 
         <label>
@@ -451,17 +449,17 @@
 
         <label>
           Lunghezza torrino (cm)
-          <input id="lunghezzaTorrino" inputmode="decimal" placeholder="es. 60" data-decimal="1" data-label="Lunghezza torrino (cm)" />
+          <input id="lunghezzaTorrino" inputmode="decimal" placeholder="es. 60.5" data-decimal="1" data-label="Lunghezza torrino (cm)" />
         </label>
 
         <label>
           Larghezza torrino (cm)
-          <input id="larghezzaTorrino" inputmode="decimal" placeholder="es. 60" data-decimal="1" data-label="Larghezza torrino (cm)" />
+          <input id="larghezzaTorrino" inputmode="decimal" placeholder="es. 60.5" data-decimal="1" data-label="Larghezza torrino (cm)" />
         </label>
 
         <label>
           Diametro torrino (cm)
-          <input id="diametroTorrino" inputmode="decimal" placeholder="es. 60" data-decimal="1" data-label="Diametro torrino (cm)" />
+          <input id="diametroTorrino" inputmode="decimal" placeholder="es. 60.5" data-decimal="1" data-label="Diametro torrino (cm)" />
         </label>
 
         <label>
@@ -553,22 +551,22 @@
 
         <label>
           Lunghezza pozzetto (cm)
-          <input id="lunghezzaPozzetto" inputmode="decimal" placeholder="es. 100" data-decimal="1" data-label="Lunghezza pozzetto (cm)" />
+          <input id="lunghezzaPozzetto" inputmode="decimal" placeholder="es. 100.5" data-decimal="1" data-label="Lunghezza pozzetto (cm)" />
         </label>
 
         <label>
           Larghezza pozzetto (cm)
-          <input id="larghezzaPozzetto" inputmode="decimal" placeholder="es. 100" data-decimal="1" data-label="Larghezza pozzetto (cm)" />
+          <input id="larghezzaPozzetto" inputmode="decimal" placeholder="es. 100.5" data-decimal="1" data-label="Larghezza pozzetto (cm)" />
         </label>
 
         <label>
           Diametro pozzetto (cm)
-          <input id="diametroPozzetto" inputmode="decimal" placeholder="es. 100" data-decimal="1" data-label="Diametro pozzetto (cm)" />
+          <input id="diametroPozzetto" inputmode="decimal" placeholder="es. 100.5" data-decimal="1" data-label="Diametro pozzetto (cm)" />
         </label>
 
         <label>
           Profondità (m)
-          <input id="profondita" inputmode="decimal" placeholder="es. 1,20" data-decimal="1" data-label="Profondità (m) (Pozzetto)" />
+          <input id="profondita" inputmode="decimal" placeholder="es. 1.20" data-decimal="1" data-label="Profondità (m) (Pozzetto)" />
         </label>
 
         <label>
@@ -581,7 +579,7 @@
       <div class="grid3">
         <label>
           Ristagno (cm)
-          <input id="ristagno" inputmode="decimal" placeholder="es. 5" data-decimal="1" data-label="Ristagno (cm)" />
+          <input id="ristagno" inputmode="decimal" placeholder="es. 5.0" data-decimal="1" data-label="Ristagno (cm)" />
         </label>
 
         <label>
@@ -634,13 +632,10 @@
             <thead>
               <tr>
                 <th>ID schema</th>
-                <!-- ✅ NUOVO: Direzione -->
                 <th>Direzione</th>
                 <th>Tipologia</th>
                 <th>Profondità (m)</th>
-                <!-- ✅ Diametro in cm -->
                 <th>Diametro (cm)</th>
-                <!-- ✅ NUOVI -->
                 <th>Larghezza (cm)</th>
                 <th>Altezza (cm)</th>
                 <th>Materiale</th>
@@ -654,7 +649,7 @@
         </div>
 
         <p class="hint">
-          Profondità: usa la virgola (es. 1,20). Non usare il punto (.).
+          Numeri decimali: usa il punto (es. 1.20). Non usare la virgola (,).
         </p>
       </div>
     </section>
