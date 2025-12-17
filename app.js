@@ -99,15 +99,16 @@ $("btnClearIntro").addEventListener("click", () => {
 
 /* ===== Tipo punto: macro + sub (ordinati alfabeticamente; “Altro” in fondo) ===== */
 const TIPO_PUNTO = {
-  "ALTRO": ["Pozzetto con sfioro", "Pozzetto duale", "Terminale Acque Bianche/sfiorate"],
-  "CADITOIA DI LINEA": ["Caditoia a bocca di lupo su linea", "Caditoia ispezione su linea"],
-  "CADITOIA FUORI LINEA": [
+ {
+  "altro": ["Pozzetto con sfioro", "Pozzetto duale", "Terminale Acque Bianche/sfiorate"],
+  "caditoia di linea": ["Caditoia a bocca di lupo su linea", "Caditoia ispezione su linea"],
+  "caditoia fuori linea": [
     "Caditoia a bocca di lupo",
     "Caditoia mista (a bocca di lupo con griglia)",
     "Caditoia piana",
     "Griglia (canalina di scolo)"
   ],
-  "CAMERETTA": [
+  "cameretta": [
     "Accesso a rete in pressione",
     "Confluenza",
     "Confluenza e Salto",
@@ -120,10 +121,10 @@ const TIPO_PUNTO = {
     "Sifone di valle",
     "Testa"
   ],
-  "DISOLEATORE": [],
-  "FOSSA SETTICA/BIOLOGICA": ["Imhoff", "Tradizionale"],
-  "IMPIANTO DI DEPURAZIONE": [],
-  "IMPIANTO DI GRIGLIATURA": [
+  "disoleatore": [],
+  "fossa settica/biologica": ["Imhoff", "Tradizionale"],
+  "impianto di depurazione": [],
+  "impianto di grigliatura": [
     "Griglia a barre",
     "Griglia a tamburo",
     "Griglia con elementi mobili della grata",
@@ -131,7 +132,7 @@ const TIPO_PUNTO = {
     "Schermatura ad arco",
     "sconosciuto"
   ],
-  "IMPIANTO DI SOLLEVAMENTO": [
+  "impianto di sollevamento": [
     "Di linea di acque miste",
     "Di linea di sole acque bianche",
     "Di linea di sole acque nere",
@@ -139,18 +140,18 @@ const TIPO_PUNTO = {
     "Immissione vasca",
     "Svuotamento Vasca"
   ],
-  "MISURATORE": ["Altro", "Contatore", "Generico", "Livello", "Portata a gravità", "Portata in pressione"],
-  "NODO DI EMISSIONE IN CAMERETTA": [],
-  "NODO DI IMMISSIONE": [],
-  "NODO RETICOLO IDRICO": ["Ispezione Reticolo Idrico", "Nodo Reticolo Idrico"],
-  "POZZETTO DISSABBIATORE": [],
-  "POZZETTO FANTASMA": [],
-  "POZZETTO SEPARATORE": [],
-  "POZZO PERDENTE": [],
-  "PUNTO CAMPIONAMENTO ACQUE DEPURATE": [],
-  "PUNTO DI ALLACCIAMENTO UTENTE INDUSTRIALE": [],
-  "PUNTO DI CAMPIONAMENTO UTENTE INDUSTRIALE": [],
-  "RACCORDO": [
+  "misuratore": ["Altro", "Contatore", "Generico", "Livello", "Portata a gravità", "Portata in pressione"],
+  "nodo di emissione in cameretta": [],
+  "nodo di immissione": [],
+  "nodo reticolo idrico": ["Ispezione Reticolo Idrico", "Nodo Reticolo Idrico"],
+  "pozzetto dissabbiatore": [],
+  "pozzetto fantasma": [],
+  "pozzetto separatore": [],
+  "pozzo perdente": [],
+  "punto campionamento acque depurate": [],
+  "punto di allacciamento utente industriale": [],
+  "punto di campionamento utente industriale": [],
+  "raccordo": [
     "Altro",
     "Connessione a T - INNESTO ALLACCIAMENTO",
     "Connessione a T - NODO DI EMISSIONE SENZA ISPEZIONE",
@@ -161,7 +162,7 @@ const TIPO_PUNTO = {
     "Pozzetto privato",
     "Pozzetto privato con Sifone"
   ],
-  "SCARICO": [
+  "scarico": [
     "Bypass Depuratore",
     "Da impianto Depurazione",
     "Da Scarico di Emergenza",
@@ -173,16 +174,16 @@ const TIPO_PUNTO = {
     "Terminale",
     "Terminale Acque Bianche"
   ],
-  "SCARICO IN CAMERETTA": [],
-  "SFIORATORE": [
+  "scarico in cameretta": [],
+  "sfioratore": [
     "By-pass depuratore",
     "Di linea con scarico in C.I.S.",
     "Di linea con scarico in suolo",
     "Immissione vasca a dispersione",
     "Immissione vasca a tenuta"
   ],
-  "VALVOLA DI RITEGNO": [],
-  "VASCA DI LAMINAZIONE - ACCUMULO": [
+  "valvola di ritegno": [],
+  "vasca di laminazione - accumulo": [
     "Accumulo",
     "Altro",
     "Vasca di dispersione",
@@ -190,10 +191,11 @@ const TIPO_PUNTO = {
     "Vasca di prima pioggia",
     "Vasca volano"
   ],
-  "GRIGLIA": [],
-  "ISPEZIONE": [],
-  "PLUVIALE": []
-};
+  "griglia": [],
+  "ispezione": [],
+  "pluviale": []
+}
+
 
 function fillSelect(selectEl, options, placeholderText) {
   selectEl.innerHTML = "";
@@ -1283,3 +1285,4 @@ $("btnNew").addEventListener("click", () => {
 
   wireLiveDecimalValidation();
 })();
+
