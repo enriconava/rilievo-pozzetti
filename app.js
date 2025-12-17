@@ -261,6 +261,74 @@ function hasComma(val) {
   return typeof val === "string" && val.includes(",");
 }
 
+/* ✅ Rendere tutti i numerici “scrivibili con .” (tastiera con punto) */
+function wireNumericTextInputs() {
+  const nodes = [
+    ...document.querySelectorAll("input[data-decimal='1']"),
+    ...$("tblCondotte").querySelectorAll("tbody input[data-decimal='1']")
+  ];
+
+  nodes.forEach((inp) => {
+    if (inp.dataset._numericText === "1") return;
+    inp.dataset._numericText = "1";
+
+    // IMPORTANT: type=text + inputmode=decimal => tastiera con "."
+    inp.type = "text";
+    inp.inputMode = "decimal";
+    inp.autocomplete = "off";
+    inp.spellcheck = false;
+
+    // pattern: numeri con un solo punto (anche ".5" o "12.")
+    inp.setAttribute("pattern", "^\\d*(\\.\\d*)?$");
+
+    // blocca caratteri non ammessi + vieta virgola
+    inp.addEventListener("beforeinput", (e) => {
+      if (!e.data) return;
+      if (e.data === ",") {
+        e.preventDefault();
+        markInvalid(inp);
+        showMsg("Usa il punto (.) per i decimali. La virgola (,) non è ammessa.", false);
+        return;
+      }
+      // consenti solo cifre e punto
+      if (!/^[0-9.]$/.test(e.data)) {
+        e.preventDefault();
+        return;
+      }
+      // consenti un solo punto
+      if (e.data === "." && inp.value.includes(".")) {
+        e.preventDefault();
+        return;
+      }
+    });
+
+    // pulizia/validazione live
+    inp.addEventListener("input", () => {
+      const v = inp.value;
+      if (hasComma(v)) {
+        markInvalid(inp);
+        showMsg("Usa il punto (.) per i decimali. La virgola (,) non è ammessa.", false);
+        return;
+      }
+      // se contiene roba strana, ripulisce (mantiene solo cifre e un punto)
+      let cleaned = "";
+      let dotUsed = false;
+      for (const ch of v) {
+        if (ch >= "0" && ch <= "9") cleaned += ch;
+        else if (ch === "." && !dotUsed) {
+          cleaned += ".";
+          dotUsed = true;
+        }
+      }
+      if (cleaned !== v) inp.value = cleaned;
+
+      // evidenzia se non matcha pattern
+      if (inp.value && !/^\d*(\.\d*)?$/.test(inp.value)) markInvalid(inp);
+      else clearInvalid(inp);
+    });
+  });
+}
+
 /* ✅ LIVE CHECK: blocca la virgola sui campi numerici */
 function wireLiveDecimalValidation() {
   const nodes = [
@@ -351,15 +419,7 @@ function saveLastId(id) {
 }
 
 /* ===== Helpers select per tabella (ORDINATI) ===== */
-const TIP_FOGNATURA = [
-  "Acque Tecnologiche",
-  "Bianca",
-  "Depurata",
-  "Mista",
-  "Nera",
-  "Sfiorata"
-];
-
+const TIP_FOGNATURA = ["Acque Tecnologiche", "Bianca", "Depurata", "Mista", "Nera", "Sfiorata"];
 const DIREZIONE_CONDOTTA = ["Entrante", "Uscente", "Attraversamento"];
 
 const COLORI_TUBAZIONI = [
@@ -458,16 +518,7 @@ const SEZIONI_LIST = [
   "Non conosciuto"
 ];
 
-const ID_SCHEMA_OPTS = [
-  "n.1 - N",
-  "n.2 - NE",
-  "n.3 - E",
-  "n.4 - SE",
-  "n.5 - S",
-  "n.6 - SW",
-  "n.7 - W",
-  "n.8 - NW"
-];
+const ID_SCHEMA_OPTS = ["n.1 - N", "n.2 - NE", "n.3 - E", "n.4 - SE", "n.5 - S", "n.6 - SW", "n.7 - W", "n.8 - NW"];
 
 function makeSelect(options, placeholder = "— Seleziona —", includeAltro = false) {
   const sel = document.createElement("select");
@@ -594,24 +645,16 @@ function ensureStateShape(s) {
     tipologia: c?.tipologia ?? "",
     tipologia_altro: c?.tipologia_altro ?? "",
 
-    profondita_raw:
-      c?.profondita_raw ??
-      (c?.profondita_m !== "" && c?.profondita_m != null ? String(c.profondita_m) : ""),
+    profondita_raw: c?.profondita_raw ?? (c?.profondita_m !== "" && c?.profondita_m != null ? String(c.profondita_m) : ""),
     profondita_m: c?.profondita_m ?? "",
 
-    diametro_raw:
-      c?.diametro_raw ??
-      (c?.diametro_cm !== "" && c?.diametro_cm != null ? String(c.diametro_cm) : ""),
+    diametro_raw: c?.diametro_raw ?? (c?.diametro_cm !== "" && c?.diametro_cm != null ? String(c.diametro_cm) : ""),
     diametro_cm: c?.diametro_cm ?? "",
 
-    larghezza_raw:
-      c?.larghezza_raw ??
-      (c?.larghezza_cm !== "" && c?.larghezza_cm != null ? String(c.larghezza_cm) : ""),
+    larghezza_raw: c?.larghezza_raw ?? (c?.larghezza_cm !== "" && c?.larghezza_cm != null ? String(c.larghezza_cm) : ""),
     larghezza_cm: c?.larghezza_cm ?? "",
 
-    altezza_raw:
-      c?.altezza_raw ??
-      (c?.altezza_cm !== "" && c?.altezza_cm != null ? String(c.altezza_cm) : ""),
+    altezza_raw: c?.altezza_raw ?? (c?.altezza_cm !== "" && c?.altezza_cm != null ? String(c.altezza_cm) : ""),
     altezza_cm: c?.altezza_cm ?? "",
 
     materiale: c?.materiale ?? "",
@@ -692,6 +735,7 @@ function condottaRowTemplate(row, idx) {
   tipWrap.appendChild(tipAlt);
 
   const prof = document.createElement("input");
+  prof.type = "text";
   prof.inputMode = "decimal";
   prof.placeholder = "es. 1.20";
   prof.value = row.profondita_raw ?? "";
@@ -699,6 +743,7 @@ function condottaRowTemplate(row, idx) {
   prof.dataset.label = `Condotta ${idx + 1} - Profondità (m)`;
 
   const diam = document.createElement("input");
+  diam.type = "text";
   diam.inputMode = "decimal";
   diam.placeholder = "es. 20.5";
   diam.value = row.diametro_raw ?? "";
@@ -706,6 +751,7 @@ function condottaRowTemplate(row, idx) {
   diam.dataset.label = `Condotta ${idx + 1} - Diametro (cm)`;
 
   const larg = document.createElement("input");
+  larg.type = "text";
   larg.inputMode = "decimal";
   larg.placeholder = "es. 30.0";
   larg.value = row.larghezza_raw ?? "";
@@ -713,6 +759,7 @@ function condottaRowTemplate(row, idx) {
   larg.dataset.label = `Condotta ${idx + 1} - Larghezza (cm)`;
 
   const alt = document.createElement("input");
+  alt.type = "text";
   alt.inputMode = "decimal";
   alt.placeholder = "es. 40.0";
   alt.value = row.altezza_raw ?? "";
@@ -799,6 +846,7 @@ function renderCondotte() {
   state.condotte.forEach((row, idx) => {
     tbody.appendChild(condottaRowTemplate(row, idx));
   });
+  wireNumericTextInputs();
   wireLiveDecimalValidation();
 }
 
@@ -1139,9 +1187,7 @@ function writeStateToForm() {
   $("diametroPozzetto").value = state.manufatto.diametro_pozzetto_cm || "";
 
   $("profondita").value =
-    state.manufatto.profondita_m === "" || state.manufatto.profondita_m == null
-      ? ""
-      : String(state.manufatto.profondita_m);
+    state.manufatto.profondita_m === "" || state.manufatto.profondita_m == null ? "" : String(state.manufatto.profondita_m);
 
   $("altroPozzetto").value = state.manufatto.altro_pozzetto || "";
 
@@ -1152,6 +1198,7 @@ function writeStateToForm() {
 
   renderCondotte();
   renderFotos();
+  wireNumericTextInputs();
   wireLiveDecimalValidation();
 }
 
@@ -1254,8 +1301,8 @@ $("btnNew").addEventListener("click", () => {
   const macroSel = $("tipoPuntoMacro");
   macrosSorted.forEach((m) => {
     const o = document.createElement("option");
-    o.value = m;
-    o.textContent = m;
+    o.value = m;                 // value invariato (compatibilità JSON)
+    o.textContent = m.toLowerCase(); // ✅ testo in minuscolo
     macroSel.appendChild(o);
   });
 
@@ -1281,7 +1328,7 @@ $("btnNew").addEventListener("click", () => {
   renderCondotte();
   renderFotos();
 
+  wireNumericTextInputs();
   wireLiveDecimalValidation();
 })();
-
 
