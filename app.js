@@ -212,7 +212,7 @@ function fillSelect(selectEl, options, placeholderText) {
 
 function buildTipoPuntoSub(macro, preferredValue = "") {
   const subSel = $("tipoPuntoSub");
-  const subs = TIPO_PUNTO[macro] ?? [];
+  const subs = TIPO_PUNTO[macro?.toUpperCase()] ?? [];
 
   if (!macro) {
     subSel.disabled = true;
@@ -230,7 +230,7 @@ function buildTipoPuntoSub(macro, preferredValue = "") {
 }
 
 function updateTipoPuntoAltroVisibility() {
-  const macro = $("tipoPuntoMacro").value;
+  const macro = ($("tipoPuntoMacro").value || "").toUpperCase();
   const subSel = $("tipoPuntoSub");
   const subVal = subSel.disabled ? "" : (subSel.value || "");
   const showAltro = (macro === "ALTRO") || (subVal === "Altro");
@@ -261,92 +261,73 @@ function hasComma(val) {
   return typeof val === "string" && val.includes(",");
 }
 
-/* ✅ Rendere tutti i numerici “scrivibili con .” (tastiera con punto) */
+/**
+ * ✅ FIX TASTIERA: per evitare keypad “solo numeri senza .”
+ * - Forza tutti gli input con data-decimal="1" a:
+ *   type="text" + inputmode="text" (così la tastiera permette il punto)
+ * - Filtra live: consenti solo cifre e un solo "."
+ * - Blocca la virgola (,) e qualunque carattere non ammesso.
+ */
 function wireNumericTextInputs() {
-  const nodes = [
-    ...document.querySelectorAll("input[data-decimal='1']"),
-    ...$("tblCondotte").querySelectorAll("tbody input[data-decimal='1']")
-  ];
-
+  const nodes = document.querySelectorAll("input[data-decimal='1']");
   nodes.forEach((inp) => {
-    if (inp.dataset._numericText === "1") return;
-    inp.dataset._numericText = "1";
+    if (inp.dataset._wiredNumericText === "1") return;
+    inp.dataset._wiredNumericText = "1";
 
-    // IMPORTANT: type=text + inputmode=decimal => tastiera con "."
+    // forza comportamento "testo" (tastiera completa)
     inp.type = "text";
-    inp.inputMode = "decimal";
+    inp.inputMode = "text";
     inp.autocomplete = "off";
     inp.spellcheck = false;
 
-    // pattern: numeri con un solo punto (anche ".5" o "12.")
-    inp.setAttribute("pattern", "^\\d*(\\.\\d*)?$");
+    const normalize = (raw) => {
+      let s = String(raw ?? "");
 
-    // blocca caratteri non ammessi + vieta virgola
+      // se c'è virgola -> invalido (non la convertiamo, come richiesto)
+      if (s.includes(",")) return { value: s, badComma: true };
+
+      // tieni solo цифre e punti
+      s = s.replace(/[^\d.]/g, "");
+
+      // consenti un solo punto
+      const parts = s.split(".");
+      if (parts.length > 2) {
+        s = parts[0] + "." + parts.slice(1).join(""); // rimuove i punti extra
+      }
+
+      return { value: s, badComma: false };
+    };
+
     inp.addEventListener("beforeinput", (e) => {
-      if (!e.data) return;
+      // blocca direttamente la virgola
       if (e.data === ",") {
         e.preventDefault();
         markInvalid(inp);
         showMsg("Usa il punto (.) per i decimali. La virgola (,) non è ammessa.", false);
-        return;
-      }
-      // consenti solo cifre e punto
-      if (!/^[0-9.]$/.test(e.data)) {
-        e.preventDefault();
-        return;
-      }
-      // consenti un solo punto
-      if (e.data === "." && inp.value.includes(".")) {
-        e.preventDefault();
-        return;
       }
     });
 
-    // pulizia/validazione live
     inp.addEventListener("input", () => {
-      const v = inp.value;
-      if (hasComma(v)) {
+      const { value, badComma } = normalize(inp.value);
+      if (badComma) {
         markInvalid(inp);
         showMsg("Usa il punto (.) per i decimali. La virgola (,) non è ammessa.", false);
         return;
       }
-      // se contiene roba strana, ripulisce (mantiene solo cifre e un punto)
-      let cleaned = "";
-      let dotUsed = false;
-      for (const ch of v) {
-        if (ch >= "0" && ch <= "9") cleaned += ch;
-        else if (ch === "." && !dotUsed) {
-          cleaned += ".";
-          dotUsed = true;
-        }
-      }
-      if (cleaned !== v) inp.value = cleaned;
 
-      // evidenzia se non matcha pattern
-      if (inp.value && !/^\d*(\.\d*)?$/.test(inp.value)) markInvalid(inp);
-      else clearInvalid(inp);
+      // se normalizzazione ha rimosso caratteri strani/punti multipli, aggiorna
+      if (inp.value !== value) inp.value = value;
+
+      // valida: vuoto ok, "." da solo ok mentre scrivi, "12." ok mentre scrivi
+      clearInvalid(inp);
     });
-  });
-}
 
-/* ✅ LIVE CHECK: blocca la virgola sui campi numerici */
-function wireLiveDecimalValidation() {
-  const nodes = [
-    ...document.querySelectorAll("input[data-decimal='1']"),
-    ...$("tblCondotte").querySelectorAll("tbody input[data-decimal='1']")
-  ];
-
-  nodes.forEach((inp) => {
-    if (inp.dataset._wiredDecimal === "1") return;
-    inp.dataset._wiredDecimal = "1";
-
-    inp.addEventListener("input", () => {
-      const v = inp.value.trim();
-      if (hasComma(v)) {
+    inp.addEventListener("blur", () => {
+      // a fine editing: non lasciare "." da solo
+      if (inp.value.trim() === ".") inp.value = "";
+      if (hasComma(inp.value)) {
         markInvalid(inp);
-        showMsg("Usa il punto (.) per i decimali. La virgola (,) non è ammessa.", false);
-      } else {
-        clearInvalid(inp);
+        showMsg("Virgola (,) non ammessa. Usa il punto (.).", false);
       }
     });
   });
@@ -383,14 +364,21 @@ function validateBeforeSave() {
 
   allDecimals.forEach((inp) => {
     const label = inp.dataset.label || inp.id || "Campo numerico";
-    if (hasComma(inp.value.trim())) {
+    const v = (inp.value || "").trim();
+    if (hasComma(v)) {
+      bad.push(label);
+      markInvalid(inp);
+    }
+    if (v && !/^\d+(\.\d+)?$/.test(v)) {
+      // accetta 12, 12.3 ; non accetta "12.." "a" ecc.
+      // (nota: vuoto è ok)
       bad.push(label);
       markInvalid(inp);
     }
   });
 
   if (bad.length) {
-    showMsg(`Usa il punto (.) al posto della virgola (,) nei campi: ${bad.join(" • ")}`, false);
+    showMsg(`Valori non validi nei campi: ${bad.join(" • ")}`, false);
     return false;
   }
   return true;
@@ -401,6 +389,7 @@ function parseNumeroOrEmpty(val) {
   const v = (val ?? "").toString().trim();
   if (!v) return "";
   if (hasComma(v)) return "";
+  if (!/^\d+(\.\d+)?$/.test(v)) return "";
   const n = Number(v);
   return Number.isFinite(n) ? n : "";
 }
@@ -419,7 +408,15 @@ function saveLastId(id) {
 }
 
 /* ===== Helpers select per tabella (ORDINATI) ===== */
-const TIP_FOGNATURA = ["Acque Tecnologiche", "Bianca", "Depurata", "Mista", "Nera", "Sfiorata"];
+const TIP_FOGNATURA = [
+  "Acque Tecnologiche",
+  "Bianca",
+  "Depurata",
+  "Mista",
+  "Nera",
+  "Sfiorata"
+];
+
 const DIREZIONE_CONDOTTA = ["Entrante", "Uscente", "Attraversamento"];
 
 const COLORI_TUBAZIONI = [
@@ -518,7 +515,16 @@ const SEZIONI_LIST = [
   "Non conosciuto"
 ];
 
-const ID_SCHEMA_OPTS = ["n.1 - N", "n.2 - NE", "n.3 - E", "n.4 - SE", "n.5 - S", "n.6 - SW", "n.7 - W", "n.8 - NW"];
+const ID_SCHEMA_OPTS = [
+  "n.1 - N",
+  "n.2 - NE",
+  "n.3 - E",
+  "n.4 - SE",
+  "n.5 - S",
+  "n.6 - SW",
+  "n.7 - W",
+  "n.8 - NW"
+];
 
 function makeSelect(options, placeholder = "— Seleziona —", includeAltro = false) {
   const sel = document.createElement("select");
@@ -645,16 +651,24 @@ function ensureStateShape(s) {
     tipologia: c?.tipologia ?? "",
     tipologia_altro: c?.tipologia_altro ?? "",
 
-    profondita_raw: c?.profondita_raw ?? (c?.profondita_m !== "" && c?.profondita_m != null ? String(c.profondita_m) : ""),
+    profondita_raw:
+      c?.profondita_raw ??
+      (c?.profondita_m !== "" && c?.profondita_m != null ? String(c.profondita_m) : ""),
     profondita_m: c?.profondita_m ?? "",
 
-    diametro_raw: c?.diametro_raw ?? (c?.diametro_cm !== "" && c?.diametro_cm != null ? String(c.diametro_cm) : ""),
+    diametro_raw:
+      c?.diametro_raw ??
+      (c?.diametro_cm !== "" && c?.diametro_cm != null ? String(c.diametro_cm) : ""),
     diametro_cm: c?.diametro_cm ?? "",
 
-    larghezza_raw: c?.larghezza_raw ?? (c?.larghezza_cm !== "" && c?.larghezza_cm != null ? String(c.larghezza_cm) : ""),
+    larghezza_raw:
+      c?.larghezza_raw ??
+      (c?.larghezza_cm !== "" && c?.larghezza_cm != null ? String(c.larghezza_cm) : ""),
     larghezza_cm: c?.larghezza_cm ?? "",
 
-    altezza_raw: c?.altezza_raw ?? (c?.altezza_cm !== "" && c?.altezza_cm != null ? String(c.altezza_cm) : ""),
+    altezza_raw:
+      c?.altezza_raw ??
+      (c?.altezza_cm !== "" && c?.altezza_cm != null ? String(c.altezza_cm) : ""),
     altezza_cm: c?.altezza_cm ?? "",
 
     materiale: c?.materiale ?? "",
@@ -736,7 +750,7 @@ function condottaRowTemplate(row, idx) {
 
   const prof = document.createElement("input");
   prof.type = "text";
-  prof.inputMode = "decimal";
+  prof.inputMode = "text";
   prof.placeholder = "es. 1.20";
   prof.value = row.profondita_raw ?? "";
   prof.dataset.decimal = "1";
@@ -744,7 +758,7 @@ function condottaRowTemplate(row, idx) {
 
   const diam = document.createElement("input");
   diam.type = "text";
-  diam.inputMode = "decimal";
+  diam.inputMode = "text";
   diam.placeholder = "es. 20.5";
   diam.value = row.diametro_raw ?? "";
   diam.dataset.decimal = "1";
@@ -752,7 +766,7 @@ function condottaRowTemplate(row, idx) {
 
   const larg = document.createElement("input");
   larg.type = "text";
-  larg.inputMode = "decimal";
+  larg.inputMode = "text";
   larg.placeholder = "es. 30.0";
   larg.value = row.larghezza_raw ?? "";
   larg.dataset.decimal = "1";
@@ -760,7 +774,7 @@ function condottaRowTemplate(row, idx) {
 
   const alt = document.createElement("input");
   alt.type = "text";
-  alt.inputMode = "decimal";
+  alt.inputMode = "text";
   alt.placeholder = "es. 40.0";
   alt.value = row.altezza_raw ?? "";
   alt.dataset.decimal = "1";
@@ -846,8 +860,9 @@ function renderCondotte() {
   state.condotte.forEach((row, idx) => {
     tbody.appendChild(condottaRowTemplate(row, idx));
   });
+
+  // ✅ importantissimo: dopo render dei campi dinamici
   wireNumericTextInputs();
-  wireLiveDecimalValidation();
 }
 
 /* ===== FOTO + CROP ===== */
@@ -1041,7 +1056,8 @@ function readFormIntoState() {
   state.superficie_posa = $("superficiePosa").value || "";
   state.superficie_posa_altro = $("superficiePosaAltro").value.trim();
 
-  state.tipo_punto_macro = $("tipoPuntoMacro").value || "";
+  // 👇 macro salvata in minuscolo (come richiesto)
+  state.tipo_punto_macro = ($("tipoPuntoMacro").value || "").toLowerCase();
   state.tipo_punto_sub = $("tipoPuntoSub").disabled ? "" : ($("tipoPuntoSub").value || "");
   state.tipo_punto_altro = $("tipoPuntoAltro").value.trim();
 
@@ -1132,8 +1148,9 @@ function writeStateToForm() {
   $("superficiePosaAltro").value = state.superficie_posa_altro || "";
   $("superficiePosa").dispatchEvent(new Event("change"));
 
-  $("tipoPuntoMacro").value = state.tipo_punto_macro || "";
-  buildTipoPuntoSub($("tipoPuntoMacro").value, state.tipo_punto_sub || "");
+  // macro in state è minuscolo -> in select mostriamo minuscolo
+  $("tipoPuntoMacro").value = (state.tipo_punto_macro || "");
+  buildTipoPuntoSub(($("tipoPuntoMacro").value || "").toUpperCase(), state.tipo_punto_sub || "");
   $("tipoPuntoAltro").value = state.tipo_punto_altro || "";
   updateTipoPuntoAltroVisibility();
 
@@ -1187,7 +1204,9 @@ function writeStateToForm() {
   $("diametroPozzetto").value = state.manufatto.diametro_pozzetto_cm || "";
 
   $("profondita").value =
-    state.manufatto.profondita_m === "" || state.manufatto.profondita_m == null ? "" : String(state.manufatto.profondita_m);
+    state.manufatto.profondita_m === "" || state.manufatto.profondita_m == null
+      ? ""
+      : String(state.manufatto.profondita_m);
 
   $("altroPozzetto").value = state.manufatto.altro_pozzetto || "";
 
@@ -1198,8 +1217,9 @@ function writeStateToForm() {
 
   renderCondotte();
   renderFotos();
+
+  // ✅ forza comportamento coerente su tutti i campi numerici
   wireNumericTextInputs();
-  wireLiveDecimalValidation();
 }
 
 /* ===== Salva+Esporta / Importa / Carica / Nuova ===== */
@@ -1292,30 +1312,36 @@ $("btnNew").addEventListener("click", () => {
 
 /* ===== INIT ===== */
 (function init() {
+  // Macro tipo punto (ordinati alfabeticamente; “ALTRO” in fondo)
   const macros = Object.keys(TIPO_PUNTO);
+
   const macrosSorted = macros
     .filter((m) => m !== "ALTRO")
     .sort((a, b) => a.localeCompare(b, "it"))
     .concat(macros.includes("ALTRO") ? ["ALTRO"] : []);
 
   const macroSel = $("tipoPuntoMacro");
+
+  // ✅ mostro in minuscolo e salvo in minuscolo (value)
   macrosSorted.forEach((m) => {
     const o = document.createElement("option");
-    o.value = m;                 // value invariato (compatibilità JSON)
-    o.textContent = m.toLowerCase(); // ✅ testo in minuscolo
+    o.value = m.toLowerCase();
+    o.textContent = m.toLowerCase();
     macroSel.appendChild(o);
   });
 
   macroSel.addEventListener("change", () => {
-    buildTipoPuntoSub(macroSel.value, "");
+    buildTipoPuntoSub(macroSel.value.toUpperCase(), "");
     updateTipoPuntoAltroVisibility();
   });
   $("tipoPuntoSub").addEventListener("change", updateTipoPuntoAltroVisibility);
 
+  // Intro persistente
   const intro = loadIntro();
   if (!intro.data_rilievo) intro.data_rilievo = todayISO();
   writeIntroToForm(intro);
 
+  // ID progressivo
   const last = loadLastId();
   const startId = /^\d+$/.test(last) ? incrementId(last) : "1";
   $("idScheda").value = startId;
@@ -1328,7 +1354,7 @@ $("btnNew").addEventListener("click", () => {
   renderCondotte();
   renderFotos();
 
+  // ✅ fondamentale per tastiera e validazione live
   wireNumericTextInputs();
-  wireLiveDecimalValidation();
 })();
 
