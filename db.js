@@ -1,4 +1,3 @@
-// Simple IndexedDB helper (no libraries)
 const DB_NAME = "PozzettiDB";
 const DB_VER = 1;
 const STORE = "schede";

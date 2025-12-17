@@ -1,11 +1,17 @@
-const CACHE_NAME = "pozzetti-pwa-v1";
+const CACHE_NAME = "pozzetti-pwa-v3";
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
   "./db.js",
-  "./manifest.json"
+  "./manifest.json",
+
+  "./vendor/cropper/cropper.min.js",
+  "./vendor/cropper/cropper.min.css",
+
+  "./icons/icon-192.png",
+  "./icons/icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
