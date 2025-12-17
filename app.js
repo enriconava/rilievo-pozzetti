@@ -100,16 +100,13 @@ $("btnClearIntro").addEventListener("click", () => {
 /* ===== Tipo punto: macro + sub (ordinati alfabeticamente; “Altro” in fondo) ===== */
 const TIPO_PUNTO = {
   "ALTRO": ["Pozzetto con sfioro", "Pozzetto duale", "Terminale Acque Bianche/sfiorate"],
-
   "CADITOIA DI LINEA": ["Caditoia a bocca di lupo su linea", "Caditoia ispezione su linea"],
-
   "CADITOIA FUORI LINEA": [
     "Caditoia a bocca di lupo",
     "Caditoia mista (a bocca di lupo con griglia)",
     "Caditoia piana",
     "Griglia (canalina di scolo)"
   ],
-
   "CAMERETTA": [
     "Accesso a rete in pressione",
     "Confluenza",
@@ -123,7 +120,6 @@ const TIPO_PUNTO = {
     "Sifone di valle",
     "Testa"
   ],
-
   "DISOLEATORE": [],
   "FOSSA SETTICA/BIOLOGICA": ["Imhoff", "Tradizionale"],
   "IMPIANTO DI DEPURAZIONE": [],
@@ -135,7 +131,6 @@ const TIPO_PUNTO = {
     "Schermatura ad arco",
     "sconosciuto"
   ],
-
   "IMPIANTO DI SOLLEVAMENTO": [
     "Di linea di acque miste",
     "Di linea di sole acque bianche",
@@ -144,7 +139,6 @@ const TIPO_PUNTO = {
     "Immissione vasca",
     "Svuotamento Vasca"
   ],
-
   "MISURATORE": ["Altro", "Contatore", "Generico", "Livello", "Portata a gravità", "Portata in pressione"],
   "NODO DI EMISSIONE IN CAMERETTA": [],
   "NODO DI IMMISSIONE": [],
@@ -156,7 +150,6 @@ const TIPO_PUNTO = {
   "PUNTO CAMPIONAMENTO ACQUE DEPURATE": [],
   "PUNTO DI ALLACCIAMENTO UTENTE INDUSTRIALE": [],
   "PUNTO DI CAMPIONAMENTO UTENTE INDUSTRIALE": [],
-
   "RACCORDO": [
     "Altro",
     "Connessione a T - INNESTO ALLACCIAMENTO",
@@ -168,7 +161,6 @@ const TIPO_PUNTO = {
     "Pozzetto privato",
     "Pozzetto privato con Sifone"
   ],
-
   "SCARICO": [
     "Bypass Depuratore",
     "Da impianto Depurazione",
@@ -181,7 +173,6 @@ const TIPO_PUNTO = {
     "Terminale",
     "Terminale Acque Bianche"
   ],
-
   "SCARICO IN CAMERETTA": [],
   "SFIORATORE": [
     "By-pass depuratore",
@@ -190,7 +181,6 @@ const TIPO_PUNTO = {
     "Immissione vasca a dispersione",
     "Immissione vasca a tenuta"
   ],
-
   "VALVOLA DI RITEGNO": [],
   "VASCA DI LAMINAZIONE - ACCUMULO": [
     "Accumulo",
@@ -200,8 +190,6 @@ const TIPO_PUNTO = {
     "Vasca di prima pioggia",
     "Vasca volano"
   ],
-
-  /* ✅ NUOVE CATEGORIE richieste */
   "GRIGLIA": [],
   "ISPEZIONE": [],
   "PLUVIALE": []
@@ -250,7 +238,7 @@ function updateTipoPuntoAltroVisibility() {
   if (!showAltro) $("tipoPuntoAltro").value = "";
 }
 
-/* ===== Validazione: vieta "." nei decimali, evidenzia rosso ===== */
+/* ===== Validazione: vieta "," nei decimali, evidenzia rosso ===== */
 const INVALID_COLOR = "#b00020";
 
 function markInvalid(el) {
@@ -269,19 +257,26 @@ function clearInvalid(el) {
   delete el.dataset._oldBoxShadow;
 }
 
-function hasDot(val) {
-  return typeof val === "string" && val.includes(".");
+function hasComma(val) {
+  return typeof val === "string" && val.includes(",");
 }
 
-/* ✅ LIVE CHECK: ogni input con data-decimal=1 viene controllato mentre scrivi */
+/* ✅ LIVE CHECK: blocca la virgola sui campi numerici */
 function wireLiveDecimalValidation() {
-  const nodes = [...document.querySelectorAll("input[data-decimal='1']")];
+  const nodes = [
+    ...document.querySelectorAll("input[data-decimal='1']"),
+    ...$("tblCondotte").querySelectorAll("tbody input[data-decimal='1']")
+  ];
+
   nodes.forEach((inp) => {
+    if (inp.dataset._wiredDecimal === "1") return;
+    inp.dataset._wiredDecimal = "1";
+
     inp.addEventListener("input", () => {
       const v = inp.value.trim();
-      if (hasDot(v)) {
+      if (hasComma(v)) {
         markInvalid(inp);
-        showMsg("Usa la virgola (,) al posto del punto (.) nei campi numerici.", false);
+        showMsg("Usa il punto (.) per i decimali. La virgola (,) non è ammessa.", false);
       } else {
         clearInvalid(inp);
       }
@@ -307,39 +302,38 @@ function validateBeforeSave() {
     bad.push("ID Scheda (solo numero intero)");
     markInvalid($("idScheda"));
   }
+  if (hasComma(idVal)) {
+    bad.push("ID Scheda (virgola non ammessa)");
+    markInvalid($("idScheda"));
+  }
 
-  // ✅ valida TUTTI i campi numerici (virgola sì, punto no)
-  const allDecimals = [...document.querySelectorAll("input[data-decimal='1']")];
+  // ✅ valida tutti i campi numerici marcati data-decimal=1
+  const allDecimals = [
+    ...document.querySelectorAll("input[data-decimal='1']"),
+    ...$("tblCondotte").querySelectorAll("tbody input[data-decimal='1']")
+  ];
+
   allDecimals.forEach((inp) => {
     const label = inp.dataset.label || inp.id || "Campo numerico";
-    if (hasDot(inp.value.trim())) {
-      bad.push(label);
-      markInvalid(inp);
-    }
-  });
-
-  // anche quelli generati in tabella condotte (già inclusi, ma lasciamo doppia sicurezza)
-  const condDecimals = [...$("tblCondotte").querySelectorAll("tbody input[data-decimal='1']")];
-  condDecimals.forEach((inp) => {
-    const label = inp.dataset.label || "Campo numerico condotta";
-    if (hasDot(inp.value.trim())) {
+    if (hasComma(inp.value.trim())) {
       bad.push(label);
       markInvalid(inp);
     }
   });
 
   if (bad.length) {
-    showMsg(`Usa la virgola (,) al posto del punto (.) nei campi: ${bad.join(" • ")}`, false);
+    showMsg(`Usa il punto (.) al posto della virgola (,) nei campi: ${bad.join(" • ")}`, false);
     return false;
   }
   return true;
 }
 
-/* ===== Parsing: vuoto -> "" ; altrimenti numero (con virgola) ===== */
+/* ===== Parsing: vuoto -> "" ; altrimenti numero (con punto) ===== */
 function parseNumeroOrEmpty(val) {
   const v = (val ?? "").toString().trim();
   if (!v) return "";
-  const n = Number(v.replace(",", "."));
+  if (hasComma(v)) return "";
+  const n = Number(v);
   return Number.isFinite(n) ? n : "";
 }
 
@@ -526,7 +520,6 @@ function ensureStateShape(s) {
     civico: "",
     rilevatore: "",
 
-    /* ✅ nuovi campi rete */
     tipologia_rete: "",
     tipologia_rete_altro: "",
 
@@ -559,7 +552,6 @@ function ensureStateShape(s) {
       profondita_banchina_cm: "",
       altro_banchina: "",
 
-      /* ✅ nuovi campi torrino */
       presenza_torrino: "",
       altezza_torrino_cm: "",
 
@@ -596,59 +588,39 @@ function ensureStateShape(s) {
   out.manufatto = { ...base.manufatto, ...(out.manufatto || {}) };
 
   out.condotte = Array.isArray(out.condotte) ? out.condotte : [];
-  out.condotte = out.condotte.map((c) => {
-    // supporto import vecchio (diametro_mm -> diametro_cm se presente)
-    let diametroRaw = c?.diametro_raw ?? "";
-    let diametroCm = c?.diametro_cm ?? "";
+  out.condotte = out.condotte.map((c) => ({
+    id_schema: c?.id_schema ?? "",
+    direzione: c?.direzione ?? "",
+    tipologia: c?.tipologia ?? "",
+    tipologia_altro: c?.tipologia_altro ?? "",
 
-    if ((diametroCm === "" || diametroCm == null) && c?.diametro_mm != null && c?.diametro_mm !== "") {
-      const mm = Number(String(c.diametro_mm).replace(",", "."));
-      if (Number.isFinite(mm)) {
-        const cm = mm / 10;
-        diametroCm = cm;
-        diametroRaw = String(cm).replace(".", ",");
-      }
-    }
+    profondita_raw:
+      c?.profondita_raw ??
+      (c?.profondita_m !== "" && c?.profondita_m != null ? String(c.profondita_m) : ""),
+    profondita_m: c?.profondita_m ?? "",
 
-    return {
-      id_schema: c?.id_schema ?? "",
+    diametro_raw:
+      c?.diametro_raw ??
+      (c?.diametro_cm !== "" && c?.diametro_cm != null ? String(c.diametro_cm) : ""),
+    diametro_cm: c?.diametro_cm ?? "",
 
-      /* ✅ nuova direzione */
-      direzione: c?.direzione ?? "",
+    larghezza_raw:
+      c?.larghezza_raw ??
+      (c?.larghezza_cm !== "" && c?.larghezza_cm != null ? String(c.larghezza_cm) : ""),
+    larghezza_cm: c?.larghezza_cm ?? "",
 
-      tipologia: c?.tipologia ?? "",
-      tipologia_altro: c?.tipologia_altro ?? "",
+    altezza_raw:
+      c?.altezza_raw ??
+      (c?.altezza_cm !== "" && c?.altezza_cm != null ? String(c.altezza_cm) : ""),
+    altezza_cm: c?.altezza_cm ?? "",
 
-      profondita_raw:
-        c?.profondita_raw ??
-        (c?.profondita_m !== "" && c?.profondita_m != null ? String(c.profondita_m).replace(".", ",") : ""),
-      profondita_m: c?.profondita_m ?? "",
-
-      /* ✅ diametro in cm (con raw + numero) */
-      diametro_raw:
-        diametroRaw ??
-        (diametroCm !== "" && diametroCm != null ? String(diametroCm).replace(".", ",") : ""),
-      diametro_cm: diametroCm ?? "",
-
-      /* ✅ nuovi campi */
-      larghezza_raw:
-        c?.larghezza_raw ??
-        (c?.larghezza_cm !== "" && c?.larghezza_cm != null ? String(c.larghezza_cm).replace(".", ",") : ""),
-      larghezza_cm: c?.larghezza_cm ?? "",
-
-      altezza_raw:
-        c?.altezza_raw ??
-        (c?.altezza_cm !== "" && c?.altezza_cm != null ? String(c.altezza_cm).replace(".", ",") : ""),
-      altezza_cm: c?.altezza_cm ?? "",
-
-      materiale: c?.materiale ?? "",
-      materiale_altro: c?.materiale_altro ?? "",
-      sezione: c?.sezione ?? "",
-      sezione_altro: c?.sezione_altro ?? "",
-      colore: c?.colore ?? "",
-      colore_altro: c?.colore_altro ?? ""
-    };
-  });
+    materiale: c?.materiale ?? "",
+    materiale_altro: c?.materiale_altro ?? "",
+    sezione: c?.sezione ?? "",
+    sezione_altro: c?.sezione_altro ?? "",
+    colore: c?.colore ?? "",
+    colore_altro: c?.colore_altro ?? ""
+  }));
 
   out.foto = Array.isArray(out.foto) ? out.foto : [];
   return out;
@@ -680,7 +652,6 @@ bindAltro("formaTorrino", "formaTorrinoAltro");
 bindAltro("materialePozzetto", "materialePozzettoAltro");
 bindAltro("formaPozzetto", "formaPozzettoAltro");
 
-/* Tipologia fognatura: bind Altro + show/hide wrapper */
 bindAltro("tipologiaFognatura", "tipologiaFognaturaAltro");
 
 function refreshTipologiaFognaturaVisibility() {
@@ -707,7 +678,6 @@ function condottaRowTemplate(row, idx) {
   const idSchema = makeSelect(ID_SCHEMA_OPTS);
   idSchema.value = row.id_schema ?? "";
 
-  /* ✅ Direzione */
   const dirSel = makeSelect(DIREZIONE_CONDOTTA, "— Seleziona —", false);
   dirSel.value = row.direzione ?? "";
 
@@ -723,30 +693,28 @@ function condottaRowTemplate(row, idx) {
 
   const prof = document.createElement("input");
   prof.inputMode = "decimal";
-  prof.placeholder = "es. 1,20";
+  prof.placeholder = "es. 1.20";
   prof.value = row.profondita_raw ?? "";
   prof.dataset.decimal = "1";
   prof.dataset.label = `Condotta ${idx + 1} - Profondità (m)`;
 
-  /* ✅ Diametro in CM + decimal */
   const diam = document.createElement("input");
   diam.inputMode = "decimal";
-  diam.placeholder = "es. 20";
+  diam.placeholder = "es. 20.5";
   diam.value = row.diametro_raw ?? "";
   diam.dataset.decimal = "1";
   diam.dataset.label = `Condotta ${idx + 1} - Diametro (cm)`;
 
-  /* ✅ Nuovi: Larghezza/Altezza (cm) */
   const larg = document.createElement("input");
   larg.inputMode = "decimal";
-  larg.placeholder = "es. 30";
+  larg.placeholder = "es. 30.0";
   larg.value = row.larghezza_raw ?? "";
   larg.dataset.decimal = "1";
   larg.dataset.label = `Condotta ${idx + 1} - Larghezza (cm)`;
 
   const alt = document.createElement("input");
   alt.inputMode = "decimal";
-  alt.placeholder = "es. 40";
+  alt.placeholder = "es. 40.0";
   alt.value = row.altezza_raw ?? "";
   alt.dataset.decimal = "1";
   alt.dataset.label = `Condotta ${idx + 1} - Altezza (cm)`;
@@ -831,7 +799,6 @@ function renderCondotte() {
   state.condotte.forEach((row, idx) => {
     tbody.appendChild(condottaRowTemplate(row, idx));
   });
-  // ricollega live validation anche ai nuovi input dinamici
   wireLiveDecimalValidation();
 }
 
@@ -1008,7 +975,6 @@ function readFormIntoState() {
 
   state.id = $("idScheda").value.trim();
 
-  /* ✅ rete */
   state.tipologia_rete = $("tipologiaRete").value || "";
   state.tipologia_rete_altro = $("tipologiaReteAltro").value.trim();
 
@@ -1049,7 +1015,6 @@ function readFormIntoState() {
   state.manufatto.profondita_banchina_cm = $("profonditaBanchina").value.trim();
   state.manufatto.altro_banchina = $("altroBanchina").value.trim();
 
-  /* ✅ torrino nuovi */
   state.manufatto.presenza_torrino = $("presenzaTorrino").value || "";
   state.manufatto.altezza_torrino_cm = $("altezzaTorrino").value.trim();
 
@@ -1082,7 +1047,6 @@ function readFormIntoState() {
   state.manufatto.presenza_sedimenti = $("presenzaSedimenti").value || "";
   state.manufatto.note_condizioni = $("noteCondizioni").value.trim();
 
-  /* ✅ parse numeri condotte (profondità/diametro/larghezza/altezza) */
   state.condotte = state.condotte.map((c) => ({
     ...c,
     profondita_m: parseNumeroOrEmpty(c.profondita_raw ?? ""),
@@ -1095,12 +1059,10 @@ function readFormIntoState() {
 function writeStateToForm() {
   $("idScheda").value = state.id || "";
 
-  /* ✅ rete */
   $("tipologiaRete").value = state.tipologia_rete || "";
   $("tipologiaReteAltro").value = state.tipologia_rete_altro || "";
   $("tipologiaRete").dispatchEvent(new Event("change"));
 
-  // show/hide tipologia fognatura
   refreshTipologiaFognaturaVisibility();
   if (state.tipologia_rete === "Fognatura") {
     $("tipologiaFognatura").value = state.tipologia_fognatura || "";
@@ -1148,7 +1110,6 @@ function writeStateToForm() {
   $("profonditaBanchina").value = state.manufatto.profondita_banchina_cm || "";
   $("altroBanchina").value = state.manufatto.altro_banchina || "";
 
-  /* ✅ torrino nuovi */
   $("presenzaTorrino").value = state.manufatto.presenza_torrino || "";
   $("altezzaTorrino").value = state.manufatto.altezza_torrino_cm || "";
 
@@ -1180,7 +1141,7 @@ function writeStateToForm() {
   $("profondita").value =
     state.manufatto.profondita_m === "" || state.manufatto.profondita_m == null
       ? ""
-      : String(state.manufatto.profondita_m).replace(".", ",");
+      : String(state.manufatto.profondita_m);
 
   $("altroPozzetto").value = state.manufatto.altro_pozzetto || "";
 
@@ -1191,8 +1152,6 @@ function writeStateToForm() {
 
   renderCondotte();
   renderFotos();
-
-  // live validation su tutti i campi (anche fuori tabella)
   wireLiveDecimalValidation();
 }
 
@@ -1286,7 +1245,6 @@ $("btnNew").addEventListener("click", () => {
 
 /* ===== INIT ===== */
 (function init() {
-  // Macro tipo punto (ordinati alfabeticamente; “ALTRO” in fondo)
   const macros = Object.keys(TIPO_PUNTO);
   const macrosSorted = macros
     .filter((m) => m !== "ALTRO")
@@ -1307,12 +1265,10 @@ $("btnNew").addEventListener("click", () => {
   });
   $("tipoPuntoSub").addEventListener("change", updateTipoPuntoAltroVisibility);
 
-  // Intro persistente
   const intro = loadIntro();
   if (!intro.data_rilievo) intro.data_rilievo = todayISO();
   writeIntroToForm(intro);
 
-  // ID progressivo
   const last = loadLastId();
   const startId = /^\d+$/.test(last) ? incrementId(last) : "1";
   $("idScheda").value = startId;
@@ -1325,6 +1281,5 @@ $("btnNew").addEventListener("click", () => {
   renderCondotte();
   renderFotos();
 
-  // attiva live validation iniziale
   wireLiveDecimalValidation();
 })();
