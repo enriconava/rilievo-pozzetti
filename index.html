@@ -646,7 +646,7 @@
                 <th>ID schema</th>
                 <th>Direzione</th>
                 <th>Tipologia</th>
-                <th>Profondità (m)</th>
+                <th>Profondità (cm)</th>
                 <th>Diametro (cm)</th>
                 <th>Larghezza (cm)</th>
                 <th>Altezza (cm)</th>
@@ -709,22 +709,17 @@
       </div>
 
       <div class="row wrap" style="margin-top:10px;">
-        <button id="btnCropRotateL" type="button" class="secondary">⟲ Ruota</button>
-        <button id="btnCropRotateR" type="button" class="secondary">⟳ Ruota</button>
+        <button id="btnCropRotateL" type="button" class="secondary">Ruota ⟲</button>
+        <button id="btnCropRotateR" type="button" class="secondary">Ruota ⟳</button>
         <button id="btnCropReset" type="button" class="secondary">Reset</button>
-
-        <div class="spacer"></div>
-
         <button id="btnCropUse" type="button">Usa ritaglio</button>
       </div>
-
-      <p class="hint">Suggerimento: pizzica per zoomare (tablet) e trascina per spostare.</p>
     </div>
   </div>
 
+  <script src="./vendor/idb-keyval-6.2.1.min.js"></script>
   <script src="./vendor/cropper/cropper.min.js"></script>
   <script src="./db.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
-
