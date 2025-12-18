@@ -628,12 +628,13 @@ function ensureStateShape(s) {
       lunghezza_pozzetto_cm: "",
       larghezza_pozzetto_cm: "",
       diametro_pozzetto_cm: "",
-      profondita_m: "",
+      profondita_pozzetto_cm: "",
       altro_pozzetto: "",
 
       ristagno_cm: "",
       appoggio_accesso: "",
       presenza_sedimenti: "",
+      profondita_soglia_cm: "",
       note_condizioni: ""
     },
 
@@ -1103,12 +1104,13 @@ function readFormIntoState() {
   state.manufatto.larghezza_pozzetto_cm = $("larghezzaPozzetto").value.trim();
   state.manufatto.diametro_pozzetto_cm = $("diametroPozzetto").value.trim();
 
-  state.manufatto.profondita_m = parseNumeroOrEmpty($("profondita").value);
+  state.manufatto.profondita_pozzetto_cm = parseNumeroOrEmpty($("profonditaPozzetto").value);
   state.manufatto.altro_pozzetto = $("altroPozzetto").value.trim();
 
   state.manufatto.ristagno_cm = $("ristagno").value.trim();
   state.manufatto.appoggio_accesso = $("appoggioAccesso").value || "";
   state.manufatto.presenza_sedimenti = $("presenzaSedimenti").value || "";
+  state.manufatto.profondita_soglia_cm = $("profonditaSoglia").value.trim();
   state.manufatto.note_condizioni = $("noteCondizioni").value.trim();
 
   state.condotte = state.condotte.map((c) => ({
@@ -1203,16 +1205,17 @@ function writeStateToForm() {
   $("larghezzaPozzetto").value = state.manufatto.larghezza_pozzetto_cm || "";
   $("diametroPozzetto").value = state.manufatto.diametro_pozzetto_cm || "";
 
-  $("profondita").value =
-    state.manufatto.profondita_m === "" || state.manufatto.profondita_m == null
+  $("profonditaPozzetto").value =
+    state.manufatto.profondita_pozzetto_cm === "" || state.manufatto.profondita_pozzetto_cm == null
       ? ""
-      : String(state.manufatto.profondita_m);
+      : String(state.manufatto.profondita_pozzetto_cm);
 
   $("altroPozzetto").value = state.manufatto.altro_pozzetto || "";
 
   $("ristagno").value = state.manufatto.ristagno_cm || "";
   $("appoggioAccesso").value = state.manufatto.appoggio_accesso || "";
   $("presenzaSedimenti").value = state.manufatto.presenza_sedimenti || "";
+  $("profonditaSoglia").value = state.manufatto.profondita_soglia_cm || "";
   $("noteCondizioni").value = state.manufatto.note_condizioni || "";
 
   renderCondotte();
