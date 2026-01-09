@@ -652,6 +652,10 @@ function ensureStateShape(s) {
     tipologia: c?.tipologia ?? "",
     tipologia_altro: c?.tipologia_altro ?? "",
 
+    pozzetto_origine: c?.pozzetto_origine ?? "",
+    pozzetto_destinazione: c?.pozzetto_destinazione ?? "",
+    altro: c?.altro ?? "",
+
     profondita_raw:
       c?.profondita_raw ??
       (c?.profondita_m !== "" && c?.profondita_m != null ? String(c.profondita_m) : ""),
@@ -725,6 +729,19 @@ $("tipologiaRete").addEventListener("change", refreshTipologiaFognaturaVisibilit
 refreshTipologiaFognaturaVisibility();
 
 /* ===== CONDOTTE: tabella ===== */
+// ✅ riordino condotte (drag & drop)
+let _dragCondottaIndex = null;
+function moveCondotta(fromIdx, toIdx) {
+  if (fromIdx == null || toIdx == null) return;
+  if (fromIdx === toIdx) return;
+  if (fromIdx < 0 || toIdx < 0) return;
+  if (fromIdx >= state.condotte.length || toIdx >= state.condotte.length) return;
+
+  const [item] = state.condotte.splice(fromIdx, 1);
+  state.condotte.splice(toIdx, 0, item);
+  renderCondotte();
+}
+
 function condottaRowTemplate(row, idx) {
   const tr = document.createElement("tr");
   const td = (child) => {
@@ -732,6 +749,47 @@ function condottaRowTemplate(row, idx) {
     x.appendChild(child);
     return x;
   };
+
+  // drag handle
+  const dragHandle = document.createElement("span");
+  dragHandle.textContent = "↕";
+  dragHandle.title = "Trascina per riordinare";
+  dragHandle.draggable = true;
+  dragHandle.style.cursor = "grab";
+  dragHandle.style.userSelect = "none";
+
+  dragHandle.addEventListener("dragstart", (e) => {
+    _dragCondottaIndex = idx;
+    try {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(idx));
+    } catch {}
+  });
+
+  dragHandle.addEventListener("dragend", () => {
+    _dragCondottaIndex = null;
+    tr.style.outline = "";
+  });
+
+  // abilita drop su tutta la riga
+  tr.addEventListener("dragover", (e) => {
+    if (_dragCondottaIndex == null) return;
+    e.preventDefault();
+    tr.style.outline = "2px dashed rgba(31,79,216,0.5)";
+  });
+
+  tr.addEventListener("dragleave", () => {
+    tr.style.outline = "";
+  });
+
+  tr.addEventListener("drop", (e) => {
+    if (_dragCondottaIndex == null) return;
+    e.preventDefault();
+    tr.style.outline = "";
+    moveCondotta(_dragCondottaIndex, idx);
+    _dragCondottaIndex = null;
+  });
+
 
   const idSchema = makeSelect(ID_SCHEMA_OPTS);
   idSchema.value = row.id_schema ?? "";
@@ -748,6 +806,21 @@ function condottaRowTemplate(row, idx) {
   wireAltro(tipSel, tipAlt);
   tipWrap.appendChild(tipSel);
   tipWrap.appendChild(tipAlt);
+
+  const pozzO = document.createElement("input");
+  pozzO.type = "text";
+  pozzO.placeholder = "es. PZ-01";
+  pozzO.value = row.pozzetto_origine ?? "";
+
+  const pozzD = document.createElement("input");
+  pozzD.type = "text";
+  pozzD.placeholder = "es. PZ-02";
+  pozzD.value = row.pozzetto_destinazione ?? "";
+
+  const altroC = document.createElement("input");
+  altroC.type = "text";
+  altroC.placeholder = "Note (facoltativo)";
+  altroC.value = row.altro ?? "";
 
   const prof = document.createElement("input");
   prof.type = "text";
@@ -826,6 +899,11 @@ function condottaRowTemplate(row, idx) {
   tipSel.addEventListener("change", () => (state.condotte[idx].tipologia = tipSel.value));
   tipAlt.addEventListener("input", () => (state.condotte[idx].tipologia_altro = tipAlt.value));
 
+
+  pozzO.addEventListener("input", () => (state.condotte[idx].pozzetto_origine = pozzO.value));
+  pozzD.addEventListener("input", () => (state.condotte[idx].pozzetto_destinazione = pozzD.value));
+  altroC.addEventListener("input", () => (state.condotte[idx].altro = altroC.value));
+
   prof.addEventListener("input", () => (state.condotte[idx].profondita_raw = prof.value));
   diam.addEventListener("input", () => (state.condotte[idx].diametro_raw = diam.value));
   larg.addEventListener("input", () => (state.condotte[idx].larghezza_raw = larg.value));
@@ -840,9 +918,13 @@ function condottaRowTemplate(row, idx) {
   colSel.addEventListener("change", () => (state.condotte[idx].colore = colSel.value));
   colAlt.addEventListener("input", () => (state.condotte[idx].colore_altro = colAlt.value));
 
+  tr.appendChild(td(dragHandle));
   tr.appendChild(td(idSchema));
   tr.appendChild(td(dirSel));
   tr.appendChild(td(tipWrap));
+  tr.appendChild(td(pozzO));
+  tr.appendChild(td(pozzD));
+  tr.appendChild(td(altroC));
   tr.appendChild(td(prof));
   tr.appendChild(td(diam));
   tr.appendChild(td(larg));
@@ -995,6 +1077,10 @@ $("btnAddCondotta").addEventListener("click", () => {
     direzione: "",
     tipologia: "",
     tipologia_altro: "",
+
+    pozzetto_origine: "",
+    pozzetto_destinazione: "",
+    altro: "",
 
     profondita_raw: "",
     profondita_m: "",
