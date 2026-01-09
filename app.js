@@ -809,12 +809,12 @@ function condottaRowTemplate(row, idx) {
 
   const pozzO = document.createElement("input");
   pozzO.type = "text";
-  pozzO.placeholder = "es. PZ-01";
+  pozzO.placeholder = "es. 1";
   pozzO.value = row.pozzetto_origine ?? "";
 
   const pozzD = document.createElement("input");
   pozzD.type = "text";
-  pozzD.placeholder = "es. PZ-02";
+  pozzD.placeholder = "es. 2";
   pozzD.value = row.pozzetto_destinazione ?? "";
 
   const altroC = document.createElement("input");
